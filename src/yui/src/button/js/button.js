@@ -1,4 +1,4 @@
-YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
+
 
     // This file is part of Moodle - http://moodle.org/
     //
@@ -484,5 +484,5 @@ YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
             }
         }});
     
-    }, '@VERSION@', {"requires": ["moodle-editor_atto-plugin"]});
+    
     
