@@ -47,8 +47,9 @@ var cktsim = (function() {
     	this.initial_conditions = [];
     	this.devices = [];
     	this.device_map = [];
-    	this.voltage_sources = [];
-    	this.current_sources = [];
+		this.voltage_piles = [];
+		this.voltage_batteries = [];
+    	//this.current_piles = [];
     	this.finalized = false;
     	this.diddc = false;
     	this.node_index = -1;
@@ -101,18 +102,18 @@ var cktsim = (function() {
 				this.devices[i].load_linear(this);
 			}
 
-			// Check for voltage source loops. 
-			var n_vsrc = this.voltage_sources.length;
-			if (n_vsrc > 0) { // At least one voltage source
+			// Check for voltage pile loops. 
+			var n_vsrc = this.voltage_piles.length;
+			if (n_vsrc > 0) { // At least one voltage pile
 			    var GV = mat_make(n_vsrc, this.N);  // Loop check
 			    for (let i = n_vsrc - 1; i >= 0; --i) {
-			    	var branch = this.voltage_sources[i].branch;
+			    	var branch = this.voltage_piles[i].branch;
 			    	for (let j = this.N - 1; j >= 0; j--)
 			    		GV[i][j] = this.Gl[branch][j];
 			    }
 			    var rGV = mat_rank(GV);
 			    if (rGV < n_vsrc) {
-			    	//alert('Warning!!! Circuit has a voltage source loop or a source or current probe shorted by a wire, please remove the source or the wire causing the short.');
+			    	//alert('Warning!!! Circuit has a voltage pile loop or a pile or current probe shorted by a wire, please remove the pile or the wire causing the short.');
 			    	//alert('Warning!!! Simulator might produce meaningless results or no result with illegal circuits.');
 			    	alert(i18n.ckt_alert1);
 			    	alert(i18n.ckt_alert2);
@@ -164,15 +165,21 @@ var cktsim = (function() {
 		// process the component
 		if (type == 'r')	// resistor
 			this.r(connections[0],connections[1],properties.r,name);
+		else if (type == 'rv')	// resistorvaariable
+		this.r(connections[0],connections[1],properties.r,name);
+		else if (type == 'f')	// resistorvaariable
+			this.r(connections[0],connections[1],properties.r,name);	
 		else if (type == 'd')	// diode
 			this.d(connections[0],connections[1],properties.area,properties.type,name);
 		else if (type == 'c')   // capacitor
 			this.c(connections[0],connections[1],properties.c,name);
 		else if (type == 'l')	// inductor
 			this.l(connections[0],connections[1],properties.l,name);
-		else if (type == 'v') 	// voltage source
-			this.v(connections[0],connections[1],properties.value,name);
-		else if (type == 'i') 	// current source
+		else if (type == 'v') 	// voltage pile
+			this.r(connections[0],connections[1],properties.r,name);
+		else if (type == 'vb') 	// voltage pile
+			this.r(connections[0],connections[1],properties.r,name);
+		else if (type == 'i') 	// current pile
 			this.i(connections[0],connections[1],properties.value,name);
 		else if (type == 'o') 	// op amp
 			this.opamp(connections[0],connections[1],connections[2],connections[3],properties.A,name);
@@ -184,10 +191,12 @@ var cktsim = (function() {
 			this.n(connections[0],connections[1],connections[2],properties.WL,name);
 		else if (type == 'p') 	// p fet
 			this.p(connections[0],connections[1],connections[2],properties.WL,name);
-		else if (type == 'a') 	// current probe == 0-volt voltage source
+		else if (type == 'a') 	// current probe == 0-volt voltage pile
 			this.v(connections[0],connections[1],'0',name);
-		else if (type == 'vm')	// voltmeter
+		else if (type == 'vm')	// mesure
 			this.d(connections[0],connections[1],'0',name);
+			else if (type == 'mo')	// moteur
+			this.d(connections[0],connections[1],'0',name);	
 	}
 
 	    if (!found_ground) { // No ground on schematic
@@ -315,8 +324,8 @@ var cktsim = (function() {
 
 	    if (typeof iterations == 'undefined') {
 	    // too many iterations
-	    if (this.current_sources.length > 0) {
-	    	//alert('Newton Method Failed, do your current sources have a conductive path to ground?');
+	    if (this.current_piles.length > 0) {
+	    	//alert('Newton Method Failed, do your current piles have a conductive path to ground?');
 	    	alert(i18n.ckt_alert4);
 	    } else {
 	    	//alert('Newton Method Failed, it may be your circuit or it may be our simulator.');
@@ -334,9 +343,9 @@ var cktsim = (function() {
 				var index = this.node_map[name];
 				result[name] = (index == -1) ? 0 : this.solution[index];
 			}
-			// capture branch currents from voltage sources
-			for (let i = this.voltage_sources.length - 1; i >= 0; --i) {
-				var v = this.voltage_sources[i];
+			// capture branch currents from voltage piles
+			for (let i = this.voltage_piles.length - 1; i >= 0; --i) {
+				var v = this.voltage_piles[i];
 				result['I('+v.name+')'] = this.solution[v.branch];
 			}
 			return result;
@@ -473,15 +482,15 @@ var cktsim = (function() {
 	    	}
 	    }
 
-	    // Check for periodic sources
+	    // Check for periodic piles
 	    var period = tstop - tstart;
-	    for (let i = this.voltage_sources.length - 1; i >= 0; --i) {
-	    	let per = this.voltage_sources[i].src.period;
+	    for (let i = this.voltage_piles.length - 1; i >= 0; --i) {
+	    	let per = this.voltage_piles[i].src.period;
 	    	if (per > 0)
 	    		period = Math.min(period, per);
 	    }
-	    for (let i = this.current_sources.length - 1; i >= 0; --i) {
-	    	let per = this.current_sources[i].src.period;
+	    for (let i = this.current_piles.length - 1; i >= 0; --i) {
+	    	let per = this.current_piles[i].src.period;
 	    	if (per > 0)
 	    		period = Math.min(period, per);
 	    }
@@ -600,9 +609,9 @@ var cktsim = (function() {
 	    	let index = this.node_map[name];
 	    	result[name] = (index == -1) ? 0 : response[index];
 	    }
-	    // capture branch currents from voltage sources
-	    for (let i = this.voltage_sources.length - 1; i >= 0; --i) {
-	    	let v = this.voltage_sources[i];
+	    // capture branch currents from voltage piles
+	    for (let i = this.voltage_piles.length - 1; i >= 0; --i) {
+	    	let v = this.voltage_piles[i];
 	    	result['I('+v.name+')'] = response[v.branch];
 	    }
 
@@ -614,7 +623,7 @@ var cktsim = (function() {
 	// result['_frequencies_'] = vector of log10(sample freqs)
 	// result['xxx'] = vector of dB(response for node xxx)
         // NOTE: Normalization removed in schematic.js, jkw.
-        Circuit.prototype.ac = function(npts,fstart,fstop,source_name) {
+        Circuit.prototype.ac = function(npts,fstart,fstop,pile_name) {
 
 	    if (this.dc() == undefined) { // DC failed, realloc mats and vects.
 	    	return undefined;
@@ -627,14 +636,14 @@ var cktsim = (function() {
 	    // Complex numbers, we're going to need a bigger boat
 	    var matrixac = mat_make(2*N, (2*N)+1);
 
-            // Get the source used for ac
-            if (this.device_map[source_name] === undefined) {
-            	//alert('AC analysis refers to unknown source ' + source_name);
-            	//return 'AC analysis failed, unknown source';            	
-            	alert(i18n.ckt_alert7 + source_name);
+            // Get the pile used for ac
+            if (this.device_map[pile_name] === undefined) {
+            	//alert('AC analysis refers to unknown pile ' + pile_name);
+            	//return 'AC analysis failed, unknown pile';            	
+            	alert(i18n.ckt_alert7 + pile_name);
             	return i18n.ckt_alert8;
             }
-            this.device_map[source_name].load_ac(this,this.rhs);
+            this.device_map[pile_name].load_ac(this,this.rhs);
 
 	    // build array to hold list of magnitude and phases for each node
 	    // last entry is for frequency values
@@ -732,7 +741,19 @@ var cktsim = (function() {
 	    if (v != 0) {
 	    	let d = new Resistor(n1,n2,v);
 	    	return this.add_device(d, name);
-	    } else return this.v(n1,n2,'0',name);   // zero resistance == 0V voltage source
+	    } else return this.v(n1,n2,'0',name);   // zero resistance == 0V voltage pile
+	};
+	Circuit.prototype.rv = function(n1,n2,v,name) {
+	    // try to convert string value into numeric value, barf if we can't
+	    if ((typeof v) == 'string') {
+	    	v = parse_number(v,undefined);
+	    	if (v === undefined) return undefined;
+	    }
+
+	    if (v != 0) {
+	    	let d = new Resistorvariable(n1,n2,v);
+	    	return this.add_device(d, name);
+	    } else return this.v(n1,n2,'0',name);   // zero resistance == 0V voltage pile
 	};
 
 	Circuit.prototype.d = function(n1,n2,area,type,name) {
@@ -747,7 +768,7 @@ var cktsim = (function() {
 	    	return this.add_device(d, name);
 	    } // zero area diodes discarded.
 	};
-	/*voltmeter */
+	/*mesure */
 	Circuit.prototype.vm = function(n1,n2,area,type,name) {
 	    // try to convert string value into numeric value, barf if we can't
 	    if ((typeof area) == 'string') {
@@ -756,7 +777,37 @@ var cktsim = (function() {
 	    }
 
 	    if (area != 0) {
-	    	let vm = new voltmeter(n1,n2,vm);
+	    	let vm = new mesure(n1,n2,vm);
+	    	return this.add_device(vm, name);
+	    } // zero area diodes discarded.
+	};
+	/************* */
+
+/*fusible */
+Circuit.prototype.f = function(n1,n2,area,type,name) {
+	// try to convert string value into numeric value, barf if we can't
+	if ((typeof area) == 'string') {
+		area = parse_number(area,undefined);
+		if (area === undefined) return undefined;
+	}
+
+	if (area != 0) {
+		let f = new fusble(n1,n2,vm);
+		return this.add_device(f, name);
+	} // zero area diodes discarded.
+};
+/************* */
+
+	/*moteur */
+	Circuit.prototype.mo = function(n1,n2,area,type,name) {
+	    // try to convert string value into numeric value, barf if we can't
+	    if ((typeof area) == 'string') {
+	    	area = parse_number(area,undefined);
+	    	if (area === undefined) return undefined;
+	    }
+
+	    if (area != 0) {
+	    	let vm = new moteur(n1,n2,vm);
 	    	return this.add_device(vm, name);
 	    } // zero area diodes discarded.
 	};
@@ -785,14 +836,14 @@ var cktsim = (function() {
 
 	Circuit.prototype.v = function(n1,n2,v,name) {
 		var branch = this.node(undefined,T_CURRENT);
-		let d = new VSource(n1,n2,branch,v);
-		this.voltage_sources.push(d);
+		let d = new Pile(n1,n2,branch,v);
+		this.voltage_piles.push(d);
 		return this.add_device(d, name);
 	};
 
 	Circuit.prototype.i = function(n1,n2,v,name) {
-		let d = new ISource(n1,n2,v);
-		this.current_sources.push(d);
+		let d = new IPile(n1,n2,v);
+		this.current_piles.push(d);
 		return this.add_device(d, name);
 	};
 
@@ -884,11 +935,11 @@ var cktsim = (function() {
 	//
 	//  Support for creating conductance and capacitance matrices associated with
     //  modified nodal analysis (unknowns are node voltages and inductor and voltage
-    //  source currents). 
+    //  pile currents). 
     //  The linearized circuit is written as 
     //          C d/dt x = G x + rhs
     //  x - vector of node voltages and element currents
-    //  rhs - vector of source values
+    //  rhs - vector of pile values
     //  C - Matrix whose values are capacitances and inductances, has many zero rows.
     //  G - Matrix whose values are conductances and +-1's.
 	//
@@ -947,7 +998,7 @@ var cktsim = (function() {
 			this.C[i][j] += c;
 	};
 
-	// add source info to rhs
+	// add pile info to rhs
 	Circuit.prototype.add_to_rhs = function(i,v,rhs) {
 		if (i >= 0)	rhs[i] += v;
 	};
@@ -1282,7 +1333,7 @@ var cktsim = (function() {
 	};
 
 	// load linear system equations for ac analysis:
-	// current sources open, voltage sources shorted
+	// current piles open, voltage piles shorted
 	// linear models at operating point for everyone else
 	Device.prototype.load_ac = function(ckt,rhs) {
 	};
@@ -1437,22 +1488,22 @@ var cktsim = (function() {
 
 	///////////////////////////////////////////////////////////////////////////////
 	//
-	//  Sources
+	//  Piles
 	//
 	///////////////////////////////////////////////////////////////////////////////
 
-	// argument is a string describing the source's value (see comments for details)
-	// source types: dc,step,square,triangle,sin,pulse,pwl,pwl_repeating
+	// argument is a string describing the pile's value (see comments for details)
+	// pile types: dc,step,square,triangle,sin,pulse,pwl,pwl_repeating
 
 	// returns an object with the following attributes:
-	//   fun -- name of source function
+	//   fun -- name of pile function
 	//   args -- list of argument values
-	//   value(t) -- compute source value at time t
+	//   value(t) -- compute pile value at time t
 	//   inflection_point(t) -- compute time after t when a time point is needed
 	//   dc -- value at time 0
-	//   period -- repeat period for periodic sources (0 if not periodic)
+	//   period -- repeat period for periodic piles (0 if not periodic)
 
-	function parse_source(v) {
+	function parse_pile(v) {
 	    // generic parser: parse v as either <value> or <fun>(<value>,...)
 	    var src = {};
 	    src.period = 0; // Default not periodic
@@ -1485,7 +1536,7 @@ var cktsim = (function() {
 		src.args = [parse_number(v,0)];
 	}
 
-	    // post-processing for constant sources
+	    // post-processing for constant piles
 	    // dc(v)
 	    if (src.fun == 'dc') {
 	    	let v = arg_value(src.args,0,0);
@@ -1493,16 +1544,16 @@ var cktsim = (function() {
 		src.value = function(t) { return v; };  // closure
 	}
 
-	    // post-processing for impulse sources
+	    // post-processing for impulse piles
 	    // impulse(height,width)
 	    else if (src.fun == 'impulse') {
 		let h = arg_value(src.args,0,1);  // default height: 1
 		let w = Math.abs(arg_value(src.args,2,1e-9));  // default width: 1ns
 		src.args = [h,w];  // remember any defaulted values
-		pwl_source(src,[0,0,w/2,h,w,0],false);
+		pwl_pile(src,[0,0,w/2,h,w,0],false);
 	}
 
-	    // post-processing for step sources
+	    // post-processing for step piles
 	    // step(v_init,v_plateau,t_delay,t_rise)
 	    else if (src.fun == 'step') {
 		let v1 = arg_value(src.args,0,0);  // default init value: 0V
@@ -1510,7 +1561,7 @@ var cktsim = (function() {
 		let td = Math.max(0,arg_value(src.args,2,0));  // time step starts
 		let tr = Math.abs(arg_value(src.args,3,1e-9));  // default rise time: 1ns
 		src.args = [v1,v2,td,tr];  // remember any defaulted values
-		pwl_source(src,[td,v1,td+tr,v2],false);
+		pwl_pile(src,[td,v1,td+tr,v2],false);
 	}
 
 	    // post-processing for square wave
@@ -1525,7 +1576,7 @@ var cktsim = (function() {
 		let per = freq == 0 ? Infinity : 1/freq;
 		let t_change = 0.01 * per;   // rise and fall time
 		let t_pw = 0.01 * duty_cycle * 0.98 * per;  // fraction of cycle minus rise and fall time
-		pwl_source(src,[0,v1,t_change,v2,t_change+t_pw,
+		pwl_pile(src,[0,v1,t_change,v2,t_change+t_pw,
 			v2,t_change+t_pw+t_change,v1,per,v1],true);
 	}
 
@@ -1538,16 +1589,16 @@ var cktsim = (function() {
 		src.args = [v1,v2,freq];  // remember any defaulted values
 
 		let per = freq == 0 ? Infinity : 1/freq;
-		pwl_source(src,[0,v1,per/2,v2,per,v1],true);
+		pwl_pile(src,[0,v1,per/2,v2,per,v1],true);
 	}
 
-	    // post-processing for pwl and pwlr sources
+	    // post-processing for pwl and pwlr piles
 	    // pwl[r](t1,v1,t2,v2,...)
 	    else if (src.fun == 'pwl' || src.fun == 'pwl_repeating') {
-	    	pwl_source(src,src.args,src.fun == 'pwl_repeating');
+	    	pwl_pile(src,src.args,src.fun == 'pwl_repeating');
 	    }
 
-	    // post-processing for pulsed sources
+	    // post-processing for pulsed piles
 	    // pulse(v_init,v_plateau,t_delay,t_rise,t_fall,t_width,t_period)
 	    else if (src.fun == 'pulse') {
 		let v1 = arg_value(src.args,0,0);  // default init value: 0V
@@ -1564,10 +1615,10 @@ var cktsim = (function() {
 		let t3 = t2 + pw;  // time when v2 -> v1 transition starts
 		let t4 = t3 + tf;  // time when v2 -> v1 transition ends
 
-		pwl_source(src,[t1,v1, t2,v2, t3,v2, t4,v1, per,v1],true);
+		pwl_pile(src,[t1,v1, t2,v2, t3,v2, t4,v1, per,v1],true);
 	}
 
-	    // post-processing for sinusoidal sources
+	    // post-processing for sinusoidal piles
 	    // sin(v_offset,v_amplitude,freq_hz,t_delay,phase_offset_degrees)
 	    else if (src.fun == 'sin') {
 		let voffset = arg_value(src.args,0,0);  // default offset voltage: 0V
@@ -1581,7 +1632,7 @@ var cktsim = (function() {
 
 		phase /= 360.0;
 
-		// return value of source at time t
+		// return value of pile at time t
 		src.value = function(t) {  // closure
 			if (t < td) return voffset + va*Math.sin(2*Math.PI*phase);
 			else return voffset + va*Math.sin(2*Math.PI*(freq*(t - td) + phase));
@@ -1594,15 +1645,15 @@ var cktsim = (function() {
 		};
 	}
 
-	    // object has all the necessary info to compute the source value and inflection points
+	    // object has all the necessary info to compute the pile value and inflection points
 	    src.dc = src.value(0);   // DC value is value at time 0
 	    return src;
 	}
 
-	function pwl_source(src,tv_pairs,repeat) {
+	function pwl_pile(src,tv_pairs,repeat) {
 		var nvals = tv_pairs.length;
 		if (repeat)
-		src.period = tv_pairs[nvals-2];  // Repeat period of source
+		src.period = tv_pairs[nvals-2];  // Repeat period of pile
 	    //if (nvals % 2 == 1) npts -= 1;   // make sure it's even!  WMc bug, npts should be nvals
 	    if (nvals % 2 == 1) nvals -= 1;    // make sure nvals is even! (equal number of v and t values)
 
@@ -1644,6 +1695,216 @@ var cktsim = (function() {
 		}
 	}
 
+
+
+		///////////////////////////////////////////////////////////////////////////////
+	//
+	//  batteries
+	//
+	///////////////////////////////////////////////////////////////////////////////
+
+	// argument is a string describing the batterie's value (see comments for details)
+	// batterie types: dc,step,square,triangle,sin,pulse,pwl,pwl_repeating
+
+	// returns an object with the following attributes:
+	//   fun -- name of batterie function
+	//   args -- list of argument values
+	//   value(t) -- compute batterie value at time t
+	//   inflection_point(t) -- compute time after t when a time point is needed
+	//   dc -- value at time 0
+	//   period -- repeat period for periodic batteries (0 if not periodic)
+
+	function parse_batterie(v) {
+	    // generic parser: parse v as either <value> or <fun>(<value>,...)
+	    var src = {};
+	    src.period = 0; // Default not periodic
+	    src.value = function(t) { return 0; };  // overridden below
+	    src.inflection_point = function(t) { return undefined; };  // may be overridden below
+
+	    // see if there's a "(" in the description
+    	var index = v.indexOf('(');
+    		var ch;
+    		if (index >= 0) {
+		src.fun = v.slice(0,index);   // function name is before the "("
+		src.args = [];	// we'll push argument values onto this list
+		var end = v.indexOf(')',index);
+		if (end == -1) end = v.length;
+
+		index += 1;     // start parsing right after "("
+			while (index < end) {
+		    // figure out where next argument value starts
+		    ch = v.charAt(index);
+		    if (ch <= ' ') { index++; continue; }
+		    // and where it ends
+		    var arg_end = v.indexOf(',',index);
+		    if (arg_end == -1) arg_end = end;
+		    // parse and save result in our list of arg values
+		    src.args.push(parse_number(v.slice(index,arg_end),undefined));
+		    index = arg_end + 1;
+		}
+	} else {
+		src.fun = 'dc';
+		src.args = [parse_number(v,0)];
+	}
+
+	    // post-processing for constant batteries
+	    // dc(v)
+	    if (src.fun == 'dc') {
+	    	let v = arg_value(src.args,0,0);
+	    	src.args = [v];
+		src.value = function(t) { return v; };  // closure
+	}
+
+	    // post-processing for impulse batteries
+	    // impulse(height,width)
+	    else if (src.fun == 'impulse') {
+		let h = arg_value(src.args,0,1);  // default height: 1
+		let w = Math.abs(arg_value(src.args,2,1e-9));  // default width: 1ns
+		src.args = [h,w];  // remember any defaulted values
+		pwl_batterie(src,[0,0,w/2,h,w,0],false);
+	}
+
+	    // post-processing for step batteries
+	    // step(v_init,v_plateau,t_delay,t_rise)
+	    else if (src.fun == 'step') {
+		let v1 = arg_value(src.args,0,0);  // default init value: 0V
+		let v2 = arg_value(src.args,1,1);  // default plateau value: 1V
+		let td = Math.max(0,arg_value(src.args,2,0));  // time step starts
+		let tr = Math.abs(arg_value(src.args,3,1e-9));  // default rise time: 1ns
+		src.args = [v1,v2,td,tr];  // remember any defaulted values
+		pwl_batterie(src,[td,v1,td+tr,v2],false);
+	}
+
+	    // post-processing for square wave
+	    // square(v_init,v_plateau,freq,duty_cycle)
+	    else if (src.fun == 'square') {
+		let v1 = arg_value(src.args,0,0);  // default init value: 0V
+		let v2 = arg_value(src.args,1,1);  // default plateau value: 1V
+		let freq = Math.abs(arg_value(src.args,2,1));  // default frequency: 1Hz
+		let duty_cycle  = Math.min(100,Math.abs(arg_value(src.args,3,50)));  // default duty cycle: 0.5
+		src.args = [v1,v2,freq,duty_cycle];  // remember any defaulted values
+
+		let per = freq == 0 ? Infinity : 1/freq;
+		let t_change = 0.01 * per;   // rise and fall time
+		let t_pw = 0.01 * duty_cycle * 0.98 * per;  // fraction of cycle minus rise and fall time
+		pwl_batterie(src,[0,v1,t_change,v2,t_change+t_pw,
+			v2,t_change+t_pw+t_change,v1,per,v1],true);
+	}
+
+	    // post-processing for triangle
+	    // triangle(v_init,v_plateua,t_period)
+	    else if (src.fun == 'triangle') {
+		let v1 = arg_value(src.args,0,0);  // default init value: 0V
+		let v2 = arg_value(src.args,1,1);  // default plateau value: 1V
+		let freq = Math.abs(arg_value(src.args,2,1));  // default frequency: 1s
+		src.args = [v1,v2,freq];  // remember any defaulted values
+
+		let per = freq == 0 ? Infinity : 1/freq;
+		pwl_batterie(src,[0,v1,per/2,v2,per,v1],true);
+	}
+
+	    // post-processing for pwl and pwlr batteries
+	    // pwl[r](t1,v1,t2,v2,...)
+	    else if (src.fun == 'pwl' || src.fun == 'pwl_repeating') {
+	    	pwl_batterie(src,src.args,src.fun == 'pwl_repeating');
+	    }
+
+	    // post-processing for pulsed batteries
+	    // pulse(v_init,v_plateau,t_delay,t_rise,t_fall,t_width,t_period)
+	    else if (src.fun == 'pulse') {
+		let v1 = arg_value(src.args,0,0);  // default init value: 0V
+		let v2 = arg_value(src.args,1,1);  // default plateau value: 1V
+		let td = Math.max(0,arg_value(src.args,2,0));  // time pulse starts
+		let tr = Math.abs(arg_value(src.args,3,1e-9));  // default rise time: 1ns
+		let tf = Math.abs(arg_value(src.args,4,1e-9));  // default rise time: 1ns
+		let pw = Math.abs(arg_value(src.args,5,1e9));  // default pulse width: "infinite"
+		let per = Math.abs(arg_value(src.args,6,1e9));  // default period: "infinite"
+		src.args = [v1,v2,td,tr,tf,pw,per];
+
+		let t1 = td;       // time when v1 -> v2 transition starts
+		let t2 = t1 + tr;  // time when v1 -> v2 transition ends
+		let t3 = t2 + pw;  // time when v2 -> v1 transition starts
+		let t4 = t3 + tf;  // time when v2 -> v1 transition ends
+
+		pwl_batterie(src,[t1,v1, t2,v2, t3,v2, t4,v1, per,v1],true);
+	}
+
+	    // post-processing for sinusoidal batteries
+	    // sin(v_offset,v_amplitude,freq_hz,t_delay,phase_offset_degrees)
+	    else if (src.fun == 'sin') {
+		let voffset = arg_value(src.args,0,0);  // default offset voltage: 0V
+		let va = arg_value(src.args,1,1);  // default amplitude: -1V to 1V
+		let freq = Math.abs(arg_value(src.args,2,1));  // default frequency: 1Hz
+		src.period = 1.0/freq;
+
+		let td = Math.max(0,arg_value(src.args,3,0));  // default time delay: 0sec
+		let phase = arg_value(src.args,4,0);  // default phase offset: 0 degrees
+		src.args = [voffset,va,freq,td,phase];
+
+		phase /= 360.0;
+
+		// return value of batterie at time t
+		src.value = function(t) {  // closure
+			if (t < td) return voffset + va*Math.sin(2*Math.PI*phase);
+			else return voffset + va*Math.sin(2*Math.PI*(freq*(t - td) + phase));
+		};
+
+		// return time of next inflection point after time t
+		src.inflection_point = function(t) {	// closure
+			if (t < td) return td;
+			else return undefined;
+		};
+	}
+
+	    // object has all the necessary info to compute the batterie value and inflection points
+	    src.dc = src.value(0);   // DC value is value at time 0
+	    return src;
+	}
+
+	function pwl_batterie(src,tv_pairs,repeat) {
+		var nvals = tv_pairs.length;
+		if (repeat)
+		src.period = tv_pairs[nvals-2];  // Repeat period of batterie
+	    //if (nvals % 2 == 1) npts -= 1;   // make sure it's even!  WMc bug, npts should be nvals
+	    if (nvals % 2 == 1) nvals -= 1;    // make sure nvals is even! (equal number of v and t values)
+
+	    if (nvals <= 2) {
+			// handle degenerate case
+			src.value = function(t) { return nvals == 2 ? tv_pairs[1] : 0; };
+			src.inflection_point = function(t) { return undefined; };
+		} else {
+			src.value = function(t) { // closure
+				if (repeat)
+				// make time periodic if values are to be repeated
+				t = Math.fmod(t,tv_pairs[nvals-2]);
+				var last_t = tv_pairs[0];
+				var last_v = tv_pairs[1];
+				if (t > last_t) {
+					var next_t,next_v;
+					for (let i = 2; i < nvals; i += 2) {
+						next_t = tv_pairs[i];
+						next_v = tv_pairs[i+1];
+					    if (next_t > last_t)  // defend against bogus tv pairs
+					    	if (t < next_t)
+					    		return last_v + (next_v - last_v)*(t - last_t)/(next_t - last_t);
+					    	last_t = next_t;
+					    	last_v = next_v;
+					}
+				}
+				return last_v;
+			};
+			src.inflection_point = function(t) {  // closure
+				if (repeat)
+				// make time periodic if values are to be repeated
+				t = Math.fmod(t,tv_pairs[nvals-2]);
+				for (let i = 0; i < nvals; i += 2) {
+					var next_t = tv_pairs[i];
+					if (t < next_t) return next_t;
+				}
+				return undefined;
+			};
+		}
+	}
 	// helper function: return args[index] if present, else default_v
 	function arg_value(args,index,default_v) {
 		if (index < args.length) {
@@ -1661,91 +1922,121 @@ var cktsim = (function() {
 
 	///////////////////////////////////////////////////////////////////////////////
 	//
-	//  Sources
+	//  Piles
 	//
 	///////////////////////////////////////////////////////////////////////////////
 
-	function VSource(npos,nneg,branch,v) {
+	function Pile(npos,nneg,branch,v) {
 		Device.call(this);
-		this.src = parse_source(v);
+		this.src = parse_pile(v);
 		this.npos = npos;
 		this.nneg = nneg;
 		this.branch = branch;
 	}
-	VSource.prototype = new Device();
-	VSource.prototype.constructor = VSource;
+	Pile.prototype = new Device();
+	Pile.prototype.constructor = Pile;
 
-	// load linear part for source evaluation
-	VSource.prototype.load_linear = function(ckt) {
-	    // MNA stamp for independent voltage source
+	// load linear part for pile evaluation
+	Pile.prototype.load_linear = function(ckt) {
+	    // MNA stamp for independent voltage pile
 	    ckt.add_to_Gl(this.branch,this.npos,1.0);
 	    ckt.add_to_Gl(this.branch,this.nneg,-1.0);
 	    ckt.add_to_Gl(this.npos,this.branch,1.0);
 	    ckt.add_to_Gl(this.nneg,this.branch,-1.0);
 	};
 
-	// Source voltage added to b.
-	VSource.prototype.load_dc = function(ckt,soln,rhs) {
+	// Pile voltage added to b.
+	Pile.prototype.load_dc = function(ckt,soln,rhs) {
 		ckt.add_to_rhs(this.branch,this.src.dc,rhs);  
 	};
 
-	// Load time-dependent value for voltage source for tran
-	VSource.prototype.load_tran = function(ckt,soln,rhs,time) {
+	// Load time-dependent value for voltage pile for tran
+	Pile.prototype.load_tran = function(ckt,soln,rhs,time) {
 		ckt.add_to_rhs(this.branch,this.src.value(time),rhs);  
 	};
 
 	// return time of next breakpoint for the device
-	VSource.prototype.breakpoint = function(time) {
+	Pile.prototype.breakpoint = function(time) {
 		return this.src.inflection_point(time);
 	};
 
 	// small signal model ac value
-	VSource.prototype.load_ac = function(ckt,rhs) {
+	Pile.prototype.load_ac = function(ckt,rhs) {
 		ckt.add_to_rhs(this.branch,1.0,rhs);
 	};
+///////////////////////////////////////////////////////////////////////////////
+	//
+	//  batteries
+	//
+	///////////////////////////////////////////////////////////////////////////////
 
-	function ISource(npos,nneg,v) {
+	function batterie(npos,nneg,branch,v) {
 		Device.call(this);
-		this.src = parse_source(v);
+		this.src = parse_batterie(v);
 		this.npos = npos;
 		this.nneg = nneg;
+		this.branch = branch;
 	}
-	ISource.prototype = new Device();
-	ISource.prototype.constructor = ISource;
+	batterie.prototype = new Device();
+	batterie.prototype.constructor = batterie;
 
-	ISource.prototype.load_linear = function(ckt) {
-	    // Current source is open when off, no linear contribution
+	// load linear part for batterie evaluation
+	batterie.prototype.load_linear = function(ckt) {
+	    // MNA stamp for independent voltage batterie
+	    ckt.add_to_Gl(this.branch,this.npos,1.0);
+	    ckt.add_to_Gl(this.branch,this.nneg,-1.0);
+	    ckt.add_to_Gl(this.npos,this.branch,1.0);
+	    ckt.add_to_Gl(this.nneg,this.branch,-1.0);
 	};
 
-	// load linear system equations for dc analysis
-	ISource.prototype.load_dc = function(ckt,soln,rhs) {
-		var is = this.src.dc;
-
-	    // MNA stamp for independent current source
-	    ckt.add_to_rhs(this.npos,-is,rhs);  // current flow into npos
-	    ckt.add_to_rhs(this.nneg,is,rhs);   // and out of nneg
+	// batterie voltage added to b.
+	batterie.prototype.load_dc = function(ckt,soln,rhs) {
+		ckt.add_to_rhs(this.branch,this.src.dc,rhs);  
 	};
 
-	// load linear system equations for tran analysis (just like DC)
-	ISource.prototype.load_tran = function(ckt,soln,rhs,time) {
-		var is = this.src.value(time);
-
-	    // MNA stamp for independent current source
-	    ckt.add_to_rhs(this.npos,-is,rhs);  // current flow into npos
-	    ckt.add_to_rhs(this.nneg,is,rhs);   // and out of nneg
+	// Load time-dependent value for voltage batterie for tran
+	batterie.prototype.load_tran = function(ckt,soln,rhs,time) {
+		ckt.add_to_rhs(this.branch,this.src.value(time),rhs);  
 	};
 
 	// return time of next breakpoint for the device
-	ISource.prototype.breakpoint = function(time) {
+	batterie.prototype.breakpoint = function(time) {
 		return this.src.inflection_point(time);
 	};
 
-	// small signal model: open circuit
-	ISource.prototype.load_ac = function(ckt,rhs) {
-	    // MNA stamp for independent current source
-	    ckt.add_to_rhs(this.npos,-1.0,rhs);  // current flow into npos
-	    ckt.add_to_rhs(this.nneg,1.0,rhs);   // and out of nneg
+	// small signal model ac value
+	Pile.prototype.load_ac = function(ckt,rhs) {
+		ckt.add_to_rhs(this.branch,1.0,rhs);
 	};
+	///////////////////////////////////////////////////////////////////////////////
+	//
+	//  Interrupteurbascule
+	//
+	///////////////////////////////////////////////////////////////////////////////
+
+	function Interrupteurbascule(n1,n2,v) {
+		Device.call(this);
+		this.n1 = n1;
+		this.n2 = n2;
+		this.g = 1.0/v;
+	}
+	Interrupteurbascule.prototype = new Device();
+	Interrupteurbascule.prototype.constructor = Interrupteurbascule;
+
+	Interrupteurbascule.prototype.load_linear = function(ckt) {
+	    // MNA stamp for admittance g
+	    ckt.add_conductance_l(this.n1,this.n2,this.g);
+	};
+
+	Interrupteurbascule.prototype.load_dc = function(ckt) {
+	    // Nothing to see here, move along.
+	};
+
+	Interrupteurbascule.prototype.load_tran = function(ckt,soln) {
+	};
+
+	Interrupteurbascule.prototype.load_ac = function(ckt) {
+	};	
 
 	///////////////////////////////////////////////////////////////////////////////
 	//
@@ -1775,6 +2066,35 @@ var cktsim = (function() {
 	};
 
 	Resistor.prototype.load_ac = function(ckt) {
+	};
+	///////////////////////////////////////////////////////////////////////////////
+	//
+	//  Resistorvariable
+	//
+	///////////////////////////////////////////////////////////////////////////////
+
+	function Resistorvariable(n1,n2,v) {
+		Device.call(this);
+		this.n1 = n1;
+		this.n2 = n2;
+		this.g = 1.0/v;
+	}
+	Resistorvariable.prototype = new Device();
+	Resistorvariable.prototype.constructor = Resistorvariable;
+
+	Resistorvariable.prototype.load_linear = function(ckt) {
+	    // MNA stamp for admittance g
+	    ckt.add_conductance_l(this.n1,this.n2,this.g);
+	};
+
+	Resistorvariable.prototype.load_dc = function(ckt) {
+	    // Nothing to see here, move along.
+	};
+
+	Resistorvariable.prototype.load_tran = function(ckt,soln) {
+	};
+
+	Resistorvariable.prototype.load_ac = function(ckt) {
 	};
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -1852,7 +2172,7 @@ var cktsim = (function() {
 	    var id = this.ais * (temp1 - 1);
 	    var gd = this.ais * (temp2 / this.vt);
 
-	    // MNA stamp for independent current source
+	    // MNA stamp for independent current pile
 	    ckt.add_to_rhs(this.anode,-id,rhs);  // current flows into anode
 	    ckt.add_to_rhs(this.cathode,id,rhs);   // and out of cathode
 	    ckt.add_conductance(this.anode,this.cathode,gd);
@@ -1934,7 +2254,7 @@ var cktsim = (function() {
 
 	///////////////////////////////////////////////////////////////////////////////
 	//
-	//  Simple Voltage-Controlled Voltage Source Op Amp model 
+	//  Simple Voltage-Controlled Voltage Pile Op Amp model 
 	//
 	///////////////////////////////////////////////////////////////////////////////
 
@@ -2071,7 +2391,7 @@ var cktsim = (function() {
 
 	Fet.prototype.load_dc = function(ckt,soln,rhs) {
 		var vds = this.type_sign * ckt.get_two_terminal(this.d, this.s, soln);
-	    if (vds < 0) { // Drain and source have swapped roles
+	    if (vds < 0) { // Drain and pile have swapped roles
 	    	let temp = this.d;
 	    	this.d = this.s;
 	    	this.s = temp;
@@ -2098,7 +2418,7 @@ var cktsim = (function() {
 				gmgs *= vds;
 			}
 		    ckt.add_to_rhs(d,-ids,rhs);		// current flows into the drain
-		    ckt.add_to_rhs(s, ids,rhs);		// and out the source		    
+		    ckt.add_to_rhs(s, ids,rhs);		// and out the pile		    
 		    ckt.add_conductance(d,s,gds);
 		    ckt.add_to_G(s,s, gmgs);
 		    ckt.add_to_G(d,s,-gmgs);
@@ -2123,7 +2443,7 @@ var cktsim = (function() {
 	var module = {
 		'Circuit': Circuit,
 		'parse_number': parse_number,
-		'parse_source': parse_source
+		'parse_pile': parse_pile
 	};
 	return module;
 }());
@@ -2266,22 +2586,27 @@ schematic = (function() {
 	var property_size = 7;  					// point size for Component property text
 	var annotation_size = 7;  					// point size for diagram annotations
     var parts_map = {
-    	'g': [Ground, i18n.Ground_connection],
-    	'L': [Label, i18n.Node_label],
-    	'v': [VSource, i18n.Voltage_source],
-    //	'i': [ISource, i18n.Current_source],
+    	//'g': [Ground, i18n.Ground_connection],
+    	//'L': [Label, i18n.Node_label],
+		'v': [Pile, i18n.Voltage_pile],
+		'f': [fusible, i18n.fusible],
+		'vb': [batterie, i18n.Voltage_Batterie],
+	//	'i': [IPile, i18n.Current_pile],
+	'io': [Interrupteurbascule, i18n.Interrupteurbascule],
 		'r': [Resistor, i18n.Resistor],
-		'vm': [voltmeter, i18n.voltmeter],
+		//'rv': [Resistorvariable, i18n.Resistorvariable],
+		'vm': [mesure, i18n.mesure],
+		'vo': [moteur, i18n.moteur],
     	'c': [Capacitor, i18n.Capacitor],
-    	'l': [Inductor, i18n.Inductor],
-    //	'o': [OpAmp, i18n.Op_Amp],
+    	//'l': [Inductor, i18n.Inductor],
+    	//'o': [OpAmp, i18n.Op_Amp],
     	'd': [Diode, i18n.Diode],
-    //	'p': [PFet, i18n.PFet],
-    //	'n': [NFet, i18n.NFet],
-	  //  'pnp': [PNP, i18n.PNP],
-	 //   'npn': [NPN, i18n.NPN],
-    //	's': [Probe, i18n.Voltage_probe],
-    //	'a': [Ammeter, i18n.Current_probe]
+    	//'p': [PFet, i18n.PFet],
+    	//'n': [NFet, i18n.NFet],
+	    //'pnp': [PNP, i18n.PNP],
+	    //'npn': [NPN, i18n.NPN],
+    	/*'s': [Probe, i18n.Voltage_probe],*/
+    	/*'a': [Ammeter, i18n.Current_probe]*/
     };
 
 	// global clipboard
@@ -2406,7 +2731,7 @@ schematic = (function() {
 			    this.ac_npts = '50'; // default values for AC Analysis
 			    this.ac_fstart = '10';
 			    this.ac_fstop = '1G';
-			    this.ac_source_name = undefined;
+			    this.ac_pile_name = undefined;
 			}
 
 			if (analyses.indexOf('tran') != -1) {
@@ -3002,7 +3327,7 @@ schematic = (function() {
 				if (c[0] == 'view') {
 					this.ac_fstart = c[5];
 					this.ac_fstop = c[6];
-					this.ac_source_name = c[7];
+					this.ac_pile_name = c[7];
 					this.tran_npts = c[8];
 					this.tran_tstop = c[9];
 					this.dc_max_iters = c[10];
@@ -3089,7 +3414,7 @@ schematic = (function() {
 	    // capture the current view parameters
 	    json.push(['view',this.origin_x,this.origin_y,this.scale,
 	    	this.ac_npts,this.ac_fstart,this.ac_fstop,
-	    	this.ac_source_name,this.tran_npts,this.tran_tstop,
+	    	this.ac_pile_name,this.tran_npts,this.tran_tstop,
 	    	this.dc_max_iters]);
 
 	    return json;
@@ -3284,7 +3609,7 @@ schematic = (function() {
 		//var npts_lbl = 'points_per_decade';	//'Number of points per decade';	//not used
 		var fstart_lbl = 'Starting_frequency';
 		var fstop_lbl = 'Ending_frequency';
-		var source_name_lbl = 'source_for_ac';		//'Name of V or I source for ac';
+		var pile_name_lbl = 'pile_for_ac';		//'Name of V or I pile for ac';
 
 		if (this.find_probes().length == 0) {
 			//alert("AC Analysis: add a voltage probe to the diagram!");
@@ -3295,7 +3620,7 @@ schematic = (function() {
 		var fields = [];
 		fields[fstart_lbl] = build_input('text',10,this.ac_fstart);
 		fields[fstop_lbl] = build_input('text',10,this.ac_fstop);
-		fields[source_name_lbl] = build_input('text',10,this.ac_source_name);
+		fields[pile_name_lbl] = build_input('text',10,this.ac_pile_name);
 
 		var content = build_table(fields);
 		content.fields = fields;
@@ -3307,19 +3632,19 @@ schematic = (function() {
 		    // retrieve parameters, remember for next time
 		    sch.ac_fstart = content.fields[fstart_lbl].value;
 		    sch.ac_fstop = content.fields[fstop_lbl].value;
-		    sch.ac_source_name = content.fields[source_name_lbl].value;
+		    sch.ac_pile_name = content.fields[pile_name_lbl].value;
 
 		    sch.ac_analysis(cktsim.parse_number(sch.ac_npts),
 		    	cktsim.parse_number(sch.ac_fstart),
 		    	cktsim.parse_number(sch.ac_fstop),
-		    	sch.ac_source_name);
+		    	sch.ac_pile_name);
 		});
 	};
 
-	Schematic.prototype.ac_analysis = function(npts,fstart,fstop,ac_source_name) {
+	Schematic.prototype.ac_analysis = function(npts,fstart,fstop,ac_pile_name) {
 		var ckt = this.extract_circuit();
 		if (ckt === null) return;
-		var results = ckt.ac(npts,fstart,fstop,ac_source_name);
+		var results = ckt.ac(npts,fstart,fstop,ac_pile_name);
 
 		if (typeof results == 'string') 
 			this.message(results);
@@ -3392,7 +3717,7 @@ schematic = (function() {
 			let label = probes[i][1];
 			let offset = cktsim.parse_number(probes[i][2]);
 			let v = results[label];
-		    // convert values into dB relative to source amplitude
+		    // convert values into dB relative to pile amplitude
 		    let v_max = 1;
 		    for (let j = v.length - 1; j >= 0; --j)
 			// convert each value to dB relative to max
@@ -3680,7 +4005,7 @@ schematic = (function() {
 			}
 		}
 
-	    // scroll/zoom/rotate/delete controls
+	    //scroll/zoom/rotate/delete controls
 	    if (!this.diagram_only) {
 	    	var o = 0.5;		// half pixel offset for sharp lines with odd pixel width
 	    	let r = this.sctl_r;
@@ -3742,7 +4067,7 @@ schematic = (function() {
 			// zoom all box
 			c.strokeRect(x-s+o,y+4*t+t/2+o,2*s,2*s);
 			c.stroke();
-
+/*
 			// rotate control
 			r = this.rctl_r;
 			x = this.rctl_x+o;
@@ -3797,7 +4122,7 @@ schematic = (function() {
 			c.lineTo(x + 5,y + 5);
 			c.moveTo(x + 5,y - 5);
 			c.lineTo(x - 5,y + 5);
-			c.stroke();
+			c.stroke();*/
 		}
 	};
 
@@ -5318,6 +5643,14 @@ schematic = (function() {
 		c.lineTo((x - this.origin_x) * this.scale,(y - this.origin_y) * this.scale);
 	};
 
+	/*Part.prototype.BezierCurveTo = function(c,x,y, dx1,dy1,dx2, dy2) {
+		var dx1 = this.dx1
+		var dx2 = this.dx2
+		var dy1 = this.dy1
+		var dy2 = this.dy2
+		c.curveTo(dx1,dy1, dx2, dy2, (x - this.origin_x) * this.scale,(y - this.origin_y) * this.scale);
+	};*/
+
 	Part.prototype.draw_line = function(c,x1,y1,x2,y2,width) {
 		c.lineWidth = width*this.scale;
 		c.beginPath();
@@ -5336,7 +5669,8 @@ schematic = (function() {
 	};
 
 	Part.prototype.draw_text = function(c,text,x,y,size) {
-	    // no text displayed for the parts icon
+		c.font = size*this.scale+'pt sans-serif';
+		c.fillText(text,(x - this.origin_x) * this.scale,(y - this.origin_y) * this.scale);
 	};
 
 	function part_enter(event) {
@@ -5564,8 +5898,9 @@ schematic = (function() {
 	};
 
 	Component.prototype.draw_line = function(c,x1,y1,x2,y2) {
-		c.strokeStyle = this.selected ? selected_style :
-		this.type == 'w' ? normal_style : component_style;
+		c.strokeStyle = this.selected ? selected_style :normal_style;
+		/*c.strokeStyle = this.selected ? selected_style :
+		this.type == 'w' ? normal_style : component_style;*/
 		var nx1 = this.transform_x(x1,y1) + this.x;
 		var ny1 = this.transform_y(x1,y1) + this.y;
 		var nx2 = this.transform_x(x2,y2) + this.x;
@@ -5574,9 +5909,10 @@ schematic = (function() {
 	};
 
 	Component.prototype.draw_circle = function(c,x,y,radius,filled) {
+		//c.strokeStyle =  normal_style;
 		if (filled) c.fillStyle = this.selected ? selected_style : normal_style;
-		else c.strokeStyle = this.selected ? selected_style :
-			this.type == 'w' ? normal_style : component_style;
+		else c.strokeStyle = this.selected ? selected_style :normal_style;
+			/*this.type == 'w' ? normal_style : component_style;*/
 		var nx = this.transform_x(x,y) + this.x;
 		var ny = this.transform_y(x,y) + this.y;
 
@@ -5596,7 +5932,7 @@ schematic = (function() {
 
      Component.prototype.draw_arc = function(c,x,y,radius,start_radians,end_radians) {
      	c.strokeStyle = this.selected ? selected_style :
-     	this.type == 'w' ? normal_style : component_style;
+     	this.type == 'w' ? normal_style : normal_style;
      	var nx = this.transform_x(x,y) + this.x;
      	var ny = this.transform_y(x,y) + this.y;
      	this.sch.draw_arc(c,nx,ny,radius,
@@ -5641,10 +5977,11 @@ schematic = (function() {
 		var a = aOrient[this.rotation*9 + alignment];
 		c.textAlign = textAlign[a];
 		c.textBaseline = textBaseline[a];
+		//c.fillStyle =  normal_style;
 		if (fill == undefined)
 			c.fillStyle = this.selected ? selected_style : normal_style;
 		else
-			c.fillStyle = fill;
+			c.fillStyle = normal_style;
 		this.sch.draw_text(c,text,
 			this.transform_x(x,y) + this.x,
 			this.transform_y(x,y) + this.y,
@@ -6239,48 +6576,243 @@ schematic = (function() {
 
 	////////////////////////////////////////////////////////////////////////////////
 	//
-	//  voltmeter
+	//  mesure
 	//
 	////////////////////////////////////////////////////////////////////////////////
-
-	function voltmeter(x,y,rotation,name,r) {
-		Component.call(this,'r',x,y,rotation);
+	var Mesure_types = ['amperemetre','voltmetre'];
+  
+		function mesure(x,y,rotation,name,vm,type) {
+		Component.call(this,'vm',x,y,rotation);
 		this.properties.name = name;
 		//this.properties.r = r ? r : '1';
-		this.add_connection(0,0);
-		this.add_connection(0,48);
-		this.bounding_box = [-5,0,5,48];
+		this.add_connection(0,-24);
+		this.add_connection(0,24);
+		this.properties.type = type ? type : 'amperemetre';
+		this.bounding_box = [-12,-24,12,24];
 		this.update_coords();
 	}
-	voltmeter.prototype = new Component();
-	voltmeter.prototype.constructor = voltmeter;
+	mesure.prototype = new Component();
+	mesure.prototype.constructor = mesure;
 
-	voltmeter.prototype.toString = function() {
-		return '<voltmeter '+this.properties.r+' ('+this.x+','+this.y+')>';
+	mesure.prototype.toString = function() {
+		return '<mesure '+this.properties.vm+' ('+this.x+','+this.y+')>';
 	};
 
-	voltmeter.prototype.draw = function(c) {
-		Component.prototype.draw.call(this,c);   // give superclass a shot
-		this.draw_line(c,0,0,0,12);
-	    this.draw_circle(c,0,24,12,false);
-		this.draw_line(c,0,36,0,48);
-		/*this.draw_line(c,0,0,0,12);*/
-	    this.draw_line(c,0,30,4,18);
-	    this.draw_line(c,0,30,-4,18);
-	   /* this.draw_line(c,-4,18,4,22);*/
-	    //this.draw_line(c,0,0,10,-4);
-	   /* this.draw_line(c,0,-10,-8,0);
-	    this.draw_line(c,4,30,-4,34);
-	    this.draw_line(c,-4,34,0,36);
-	    this.draw_line(c,0,36,0,48);*/
-	    /*if (this.properties.r)
-	    	this.draw_text(c,this.properties.r+'\u03A9',8,24,3,property_size);
+	mesure.prototype.draw = function(c) {
+		Component.prototype.draw.call(this,c); 
+		
+		  // give superclass a shot
+		this.draw_line(c,0,-24,0,-12);
+	    this.draw_circle(c,0,0,12,false);
+		this.draw_line(c,0,12,0,24);
+		if (this.properties.type == 'voltmetre') {
+			// put a box around an ideal diode
+			this.draw_text(c,"V",0,-9,1,16, false);
+		}
+
+			else{
+				this.draw_text(c,"A",0,-9,1,16, false);
+			}
+	   
+	   
 	    if (this.properties.name)
-	    	this.draw_text(c,this.properties.name,-8,24,5,property_size);*/
+	    	this.draw_text(c,this.properties.name,30,0,5,property_size);
+	};
+	mesure.prototype.edit_properties = function(x,y) {
+		if (inside(this.bbox,x,y)) {
+			var fields = [];
+			fields.name = build_input('text',10,this.properties.name);
+						fields.type = build_select(Mesure_types,this.properties.type);
+
+			var content = build_table(fields);
+			content.fields = fields;
+			content.component = this;
+
+			this.sch.dialog(i18n.Edit_Properties,content,function(content) {
+				content.component.properties.name = content.fields.name.value;
+				content.component.properties.type = Mesure_types[content.fields.type.selectedIndex];
+				content.component.sch.redraw_background();
+			});
+			return true;
+		} else return false;
+	};
+	mesure.prototype.clone = function(x,y) {
+		return new mesure(x,y,this.rotation,this.properties.name,this.properties.vm);
+	};
+		////////////////////////////////////////////////////////////////////////////////
+	//
+	//  moteur
+	//
+	////////////////////////////////////////////////////////////////////////////////
+	
+  
+		function moteur(x,y,rotation,name,mo) {
+		Component.call(this,'mo',x,y,rotation);
+		this.properties.name = name;
+		//this.properties.r = r ? r : '1';
+		this.add_connection(0,-24);
+		this.add_connection(0,24);
+		
+		this.bounding_box = [-12,-24,12,24];
+		this.update_coords();
+	}
+	moteur.prototype = new Component();
+	moteur.prototype.constructor = moteur;
+
+	moteur.prototype.toString = function() {
+		return '<moteur '+this.properties.mo+' ('+this.x+','+this.y+')>';
 	};
 
-	voltmeter.prototype.clone = function(x,y) {
-		return new voltmeter(x,y,this.rotation,this.properties.name,this.properties.r);
+	moteur.prototype.draw = function(c) {
+		Component.prototype.draw.call(this,c); 
+		
+		  // give superclass a shot
+		this.draw_line(c,0,-24,0,-12);
+	    this.draw_circle(c,0,0,12,false);
+		this.draw_line(c,0,12,0,24);
+		
+				this.draw_text(c,"M",0,-9,1,16, false);
+				   
+	   
+	    if (this.properties.name)
+	    	this.draw_text(c,this.properties.name,30,0,5,property_size);
+	};
+	
+	moteur.prototype.clone = function(x,y) {
+		return new moteur(x,y,this.rotation,this.properties.name,this.properties.vm);
+	};
+		////////////////////////////////////////////////////////////////////////////////
+	//
+	//  Interrupteurbascule
+	//
+	////////////////////////////////////////////////////////////////////////////////
+	var Interrupteurbascule_types = ['ouvert','ferme'];
+    function Interrupteurbascule(x,y,rotation,name,r, type) {
+		Component.call(this,'r',x,y,rotation);
+		this.properties.name = name;
+		this.properties.r = r ? r : '1';
+		this.properties.type = type ? type : 'ouvert';
+		this.add_connection(0,-24);
+		this.add_connection(0,24);
+		this.bounding_box = [-14,-24,14,24];//
+		//this.bounding_box = (type == 'ferme') ? [-5,-24,5,24] : [-8,0,8,48];
+		this.update_coords();
+		
+	}
+	Interrupteurbascule.prototype = new Component();
+	Interrupteurbascule.prototype.constructor = Interrupteurbascule;
+	
+	Interrupteurbascule.prototype.toString = function() {
+		return '<Interrupteurbascule '+this.properties.r+' ('+this.x+','+this.y+')>';
+	};
+	
+	Interrupteurbascule.prototype.draw = function(c) {
+		Component.prototype.draw.call(this,c);   //give superclass a shot 
+		c.strokeStyle = normal_style ;
+		
+		this.draw_line(c,0,-24,0,-12);
+		this.draw_line(c,0,24,0,12);
+		 c.stroke();
+		
+		 c.strokeStyle = normal_style ;
+		
+					this.draw_circle(c,  0,-10,2,false );
+					this.draw_circle(c,  0,10,2,false );
+					
+
+					
+		 
+		if (this.properties.type == 'ferme') {
+			// put a box around an ideal diode
+			this.draw_line(c,0,-12,0,12);
+		}
+
+			else{
+				this.draw_line(c,-2,-8,-12,6);
+			}
+			
+		
+	
+		
+	    /*if (this.properties.r)
+			this.draw_text(c,this.properties.r+'\u03A9',20,20,5,property_size);*/
+		if (this.properties.name)
+			this.draw_text(c,this.properties.name,20,30,5,property_size);
+	};
+	Interrupteurbascule.prototype.edit_properties = function(x,y) {
+		if (inside(this.bbox,x,y)) {
+			var fields = [];
+			fields.name = build_input('text',10,this.properties.name);
+						fields.type = build_select(Interrupteurbascule_types,this.properties.type);
+
+			var content = build_table(fields);
+			content.fields = fields;
+			content.component = this;
+
+			this.sch.dialog(i18n.Edit_Properties,content,function(content) {
+				content.component.properties.name = content.fields.name.value;
+				content.component.properties.type = Interrupteurbascule_types[content.fields.type.selectedIndex];
+				content.component.sch.redraw_background();
+			});
+			return true;
+		} else return false;
+	};
+
+	
+	Interrupteurbascule.prototype.clone = function(x,y) {
+		return new Interrupteurbascule(x,y,this.rotation,this.properties.name,this.properties.r);
+	};
+
+		////////////////////////////////////////////////////////////////////////////////
+	//
+	//  fusible
+	//
+	////////////////////////////////////////////////////////////////////////////////
+	
+    function fusible(x,y,rotation,name,f) {
+		Component.call(this,'f',x,y,rotation);
+		this.properties.name = name;
+		//this.properties.r = r ? r : '1';
+		
+		this.add_connection(0,-24);
+		this.add_connection(0,24);
+		this.bounding_box = [-14,-24,14,24];//
+		//this.bounding_box = (type == 'ferme') ? [-5,-24,5,24] : [-8,0,8,48];
+		this.update_coords();
+		
+	}
+	fusible.prototype = new Component();
+	fusible.prototype.constructor = fusible;
+	
+	fusible.prototype.toString = function() {
+		return '<fusible '+this.properties.r+' ('+this.x+','+this.y+')>';
+	};
+	
+	fusible.prototype.draw = function(c) {
+		Component.prototype.draw.call(this,c);   //give superclass a shot 
+		c.strokeStyle = normal_style ;
+		
+		this.draw_line(c,0,-24,0,-8);
+		this.draw_line(c,0,24,0,8);
+		this.draw_line(c,0,-8,3,-8);
+		this.draw_arc(c,3,-4,4,6*Math.PI/4,2*Math.PI/4);
+		this.draw_line(c,-3,0,3,0);
+		this.draw_arc(c,-3,4,4,-6*Math.PI/4,-2*Math.PI/4);
+		this.draw_line(c,0,8,-3,8);
+	   
+		
+	
+		
+	    /*if (this.properties.r)
+			this.draw_text(c,this.properties.r+'\u03A9',20,20,5,property_size);*/
+		if (this.properties.name)
+			this.draw_text(c,this.properties.name,20,30,5,property_size);
+	};
+
+
+	
+	fusible.prototype.clone = function(x,y) {
+		return new fusible(x,y,this.rotation,this.properties.name,this.properties.f);
 	};
 	////////////////////////////////////////////////////////////////////////////////
 	//
@@ -6292,10 +6824,11 @@ schematic = (function() {
 		Component.call(this,'r',x,y,rotation);
 		this.properties.name = name;
 		this.properties.r = r ? r : '1';
-		this.add_connection(0,0);
-		this.add_connection(0,48);
-		this.bounding_box = [-5,0,5,48];
+		this.add_connection(0,-24);
+		this.add_connection(0,24);
+		this.bounding_box = [-5,-24,5,24];//
 		this.update_coords();
+		
 	}
 	Resistor.prototype = new Component();
 	Resistor.prototype.constructor = Resistor;
@@ -6305,8 +6838,91 @@ schematic = (function() {
 	};
 
 	Resistor.prototype.draw = function(c) {
-	    Component.prototype.draw.call(this,c);   // give superclass a shot
-	    this.draw_line(c,0,0,0,12);
+		Component.prototype.draw.call(this,c);   //give superclass a shot 
+		c.strokeStyle = normal_style ;
+		c.beginPath();
+		this.moveTo(c, 0,24 );
+		this.lineTo(c, 0.196,12.326 );
+    	this.lineTo(c, -3.717,10.37 );
+    	this.lineTo(c, 4.11,6.456 );
+    	this.lineTo(c, -3.717,2.545 );
+    	this.lineTo(c, 4.11,-1.369 );
+    	this.lineTo(c, -3.717,-5.282 );
+    	this.lineTo(c, 4.11,-9.194 );
+    	this.lineTo(c, 0.196,-11.15 );
+    	this.lineTo(c, 0.196,-24 );
+    	
+		
+		c.stroke();
+		
+		
+	    if (this.properties.r)
+	    	this.draw_text(c,this.properties.r+'\u03A9',20,-8,5,property_size);
+	    if (this.properties.name)
+	    	this.draw_text(c,this.properties.name,20,8,5,property_size);
+	};
+
+	Resistor.prototype.clone = function(x,y) {
+		return new Resistor(x,y,this.rotation,this.properties.name,this.properties.r);
+	};
+////////////////////////////////////////////////////////////////////////////////
+	//
+	//  Resistorvariable
+	//
+	////////////////////////////////////////////////////////////////////////////////
+
+	function Resistorvariable(x,y,rotation,name,r) {
+		Component.call(this,'r',x,y,rotation);
+		this.properties.name = name;
+		this.properties.r = r ? r : '1';
+		this.add_connection(0,-24);
+		this.add_connection(0,24);
+		this.bounding_box = [-5,-24,5,24];//
+		this.update_coords();
+		
+	}
+	Resistorvariable.prototype = new Component();
+	Resistorvariable.prototype.constructor = Resistorvariable;
+
+	Resistorvariable.prototype.toString = function() {
+		return '<Resistorvariable '+this.properties.r+' ('+this.x+','+this.y+')>';
+	};
+
+	Resistorvariable.prototype.draw = function(c) {
+		Component.prototype.draw.call(this,c);   //give superclass a shot 
+		c.strokeStyle = normal_style ;
+		c.beginPath();
+		this.moveTo(c, 0,24 );
+		this.lineTo(c, 0.196,12.326 );
+    	this.lineTo(c, -3.717,10.37 );
+    	this.lineTo(c, 4.11,6.456 );
+    	this.lineTo(c, -3.717,2.545 );
+    	this.lineTo(c, 4.11,-1.369 );
+    	this.lineTo(c, -3.717,-5.282 );
+    	this.lineTo(c, 4.11,-9.194 );
+    	this.lineTo(c, 0.196,-11.15 );
+    	this.lineTo(c, 0.196,-24 );
+    	/*this.lineTo(c, 0,12 );
+    	this.lineTo(c, -4,10.5 );
+    	this.lineTo(c, 4,2.5 );
+    	this.lineTo(c, -4,1.5);
+    	this.lineTo(c, 4,-1 );
+    	this.lineTo(c, -4,-5.2 );
+    	this.lineTo(c, 4,-9.2 );
+    	this.lineTo(c, 0,-12 );
+		this.lineTo(c, 0,-24 );*/
+		c.fill();
+		c.stroke();
+		
+		c.beginPath();
+		c.strokeStyle = normal_style ;
+		this.moveTo(c, -7.629,6.456 );
+    	this.lineTo(c, 8.022,-5.282 );
+    	this.lineTo(c, 8.022,-13.107);
+		c.fill();
+		c.stroke();
+
+	    /*this.draw_line(c,0,0,0,12);
 	    this.draw_line(c,0,12,4,14);
 	    this.draw_line(c,4,14,-4,18);
 	    this.draw_line(c,-4,18,4,22);
@@ -6314,17 +6930,16 @@ schematic = (function() {
 	    this.draw_line(c,-4,26,4,30);
 	    this.draw_line(c,4,30,-4,34);
 	    this.draw_line(c,-4,34,0,36);
-	    this.draw_line(c,0,36,0,48);
+	    this.draw_line(c,0,36,0,48);*/
 	    if (this.properties.r)
-	    	this.draw_text(c,this.properties.r+'\u03A9',8,24,3,property_size);
+	    	this.draw_text(c,this.properties.r+'\u03A9',20,20,5,property_size);
 	    if (this.properties.name)
-	    	this.draw_text(c,this.properties.name,-8,24,5,property_size);
+	    	this.draw_text(c,this.properties.name,20,30,5,property_size);
 	};
 
-	Resistor.prototype.clone = function(x,y) {
-		return new Resistor(x,y,this.rotation,this.properties.name,this.properties.r);
+	Resistorvariable.prototype.clone = function(x,y) {
+		return new Resistorvariable(x,y,this.rotation,this.properties.name,this.properties.r);
 	};
-
 	////////////////////////////////////////////////////////////////////////////////
 	//
 	//  Capacitor
@@ -6409,16 +7024,16 @@ schematic = (function() {
 	//
 	////////////////////////////////////////////////////////////////////////////////
 
-	var diode_types = ['normal','ideal'];
+	var diode_types = ['normal','DEL'];
 
 	function Diode(x,y,rotation,name,area,type) {
 		Component.call(this,'d',x,y,rotation);
 		this.properties.name = name;
 		this.properties.area = area ? area : '1';
 		this.properties.type = type ? type : 'normal';
-	    this.add_connection(0,0);   // anode
-	    this.add_connection(0,48);  // cathode
-	    this.bounding_box = (type == 'ideal') ? [-12,0,12,48] : [-8,0,8,48];
+	    this.add_connection(0,-24);   // anode
+	    this.add_connection(0,24);  // cathode
+	    this.bounding_box = (type == 'DEL') ? [-12,-24,12,24] : [-8,-24,8,24];
 	    this.update_coords();
 	}
 	Diode.prototype = new Component();
@@ -6430,31 +7045,40 @@ schematic = (function() {
 
 	Diode.prototype.draw = function(c) {
 	    Component.prototype.draw.call(this,c);   // give superclass a shot
-	    this.draw_line(c, 0,0,0,18);
-	    //this.draw_line(c,-8,18,8,18);
+	    this.draw_line(c, 0,-24,0,-6);
+	    //this.draw_line(c,-8,-12,8,-12);
 	    //this.draw_line(c,-8,18,0,30);
 	    //this.draw_line(c, 8,18,0,30);
-	    this.draw_line(c,-8,30,8,30);
-	    this.draw_line(c, 0,30,0,48);
+	    this.draw_line(c,-8,8,8,8);
+		this.draw_line(c, 0,8,0,24);
+		this.draw_text(c,"-",7,14,1,8);
+		this.draw_text(c,"+",7,-22,1,8);
 
     	c.fillStyle = this.selected ? selected_style : component_style;
-    	c.beginPath();
+		c.beginPath();
+		this.moveTo(c,-8,-6);			//arrow
+    	this.lineTo(c,8,-6);
+    	this.lineTo(c,0,8);
+		this.lineTo(c,-8,-6);
+		/*
     	this.moveTo(c,-8,18);			//arrow
     	this.lineTo(c,8,18);
     	this.lineTo(c,0,30);
-    	this.lineTo(c,-8,18);
+    	this.lineTo(c,-8,18);*/
     	c.fill();
 
-	    if (this.properties.type == 'ideal') {
+	    if (this.properties.type == 'DEL') {
 		// put a box around an ideal diode
-		this.draw_line(c,-10,12,10,12);
-		this.draw_line(c,-10,12,-10,36);
+		this.draw_circle(c,0,0,12,false);
+		this.draw_line(c,8,14,12,18);
+		this.draw_line(c,12,12,16,16);
+		/*this.draw_line(c,-10,12,-10,36);
 		this.draw_line(c,10,12,10,36);
-		this.draw_line(c,-10,36,10,36);
+		this.draw_line(c,-10,36,10,36);*/
 		}
 
-		if (this.properties.area)
-			this.draw_text(c,this.properties.area,10,24,3,property_size);
+		/*if (this.properties.area)
+			this.draw_text(c,this.properties.area,10,24,3,property_size);*/
 		if (this.properties.name)
 			this.draw_text(c,this.properties.name,-10,24,5,property_size);
 	};
@@ -6615,7 +7239,7 @@ schematic = (function() {
 		this.properties.WL = w_over_l ? w_over_l : '2';
 	    this.add_connection(0,0);   // drain
 	    this.add_connection(-24,24);  // gate
-	    this.add_connection(0,48);  // source
+	    this.add_connection(0,48);  // pile
 	    this.bounding_box = [-24,0,8,48];
 	    this.update_coords();
 	}
@@ -6660,7 +7284,7 @@ schematic = (function() {
 		this.properties.WL = w_over_l ? w_over_l : '2';
 	    this.add_connection(0,0);   // drain
 	    this.add_connection(-24,24);  // gate
-	    this.add_connection(0,48);  // source
+	    this.add_connection(0,48);  // pile
 	    this.bounding_box = [-24,0,8,48];
 	    this.update_coords();
 	}
@@ -6745,43 +7369,96 @@ schematic = (function() {
 
 	////////////////////////////////////////////////////////////////////////////////
 	//
-	//  Source
+	//  Pile
 	//
 	////////////////////////////////////////////////////////////////////////////////
-
-	function Source(x,y,rotation,name,type,value) {
+	
+	function Pile(x,y,rotation,name,type,r) {
 		Component.call(this,type,x,y,rotation);
 		this.properties.name = name;
-		if (value == undefined) value = 'dc(1)';
-		this.properties.value = value;
+		this.properties.r = r ? r : '10';
 		this.add_connection(0,0);
 		this.add_connection(0,48);
 		this.bounding_box = [-12,0,12,48];
 		this.update_coords();
-	    this.content = document.createElement('div');  // used by edit_properties
+	    //this.content = document.createElement('div');  // used by edit_properties
 	}
-	Source.prototype = new Component();
-	Source.prototype.constructor = Source;
+	Pile.prototype = new Component();
+	Pile.prototype.constructor = Pile;
 
-	Source.prototype.toString = function() {
-		return '<'+this.type+'source '+this.properties.params+' ('+this.x+','+this.y+')>';
+	Pile.prototype.toString = function() {
+		return '<Pile '+this.properties.r+' ('+this.x+','+this.y+')>';
 	};
 
-	Source.prototype.draw = function(c) {
+	Pile.prototype.draw = function(c) {
 	    Component.prototype.draw.call(this,c);   // give superclass a shot
 	    this.draw_line(c,0,0,0,22);
 	    //this.draw_circle(c,0,24,12,false);
 	    this.draw_line(c,0,26,0,48);
 
-	    if (this.type == 'v') {  		// voltage source
+	    		// voltage pile
 		// draw + and -
-		this.draw_line(c,12,12,12,0);
+		//this.draw_line(c,12,12,12,0);
 		
-		this.draw_line(c,6,6,18,6);
+		//this.draw_line(c,6,6,18,6);
 		this.draw_line(c,-8,22,8,22);
 		this.draw_line(c,-3,26,3,26);
-		this.draw_line(c,8,40,16,40);
-	    } /*else if (this.type == 'i') {  // current source
+		//this.draw_line(c,8,40,16,40);
+	    this.draw_text(c,"-",14,40,12,8);
+		this.draw_text(c,"+",14,0,12,8);
+				
+
+		if (this.properties.name)
+			this.draw_text(c,this.properties.name,20,18,2,property_size);
+			if (this.properties.r)
+			this.draw_text(c,this.properties.r +'V',20,30,2,property_size);
+	};
+
+	Pile.prototype.clone = function(x,y) {
+		return new Pile(x,y,this.rotation,this.properties.name,this.properties.r);
+	};
+
+	////////////////////////////////////////////////////////////////////////////////
+	//
+	//  batterie
+	//
+	////////////////////////////////////////////////////////////////////////////////
+	
+	function batterie(x,y,rotation,name,type,r) {
+		Component.call(this,type,x,y,rotation);
+		this.properties.name = name;
+		this.properties.r = r ? r : '10';
+		this.add_connection(0,0);
+		this.add_connection(0,48);
+		this.bounding_box = [-12,0,12,48];
+		this.update_coords();
+	    //this.content = document.createElement('div');  // used by edit_properties
+	}
+	batterie.prototype = new Component();
+	batterie.prototype.constructor = batterie;
+
+	batterie.prototype.toString = function() {
+		return '<batterie '+this.properties.r+' ('+this.x+','+this.y+')>';
+	};
+
+	batterie.prototype.draw = function(c) {
+	    Component.prototype.draw.call(this,c);   // give superclass a shot
+	    this.draw_line(c,0,0,0,22);
+	    //this.draw_circle(c,0,24,12,false);
+	    this.draw_line(c,0,26,0,48);
+
+	    		// voltage pile
+		// draw + and -
+		
+		this.draw_line(c,-8,25,8,25);
+		this.draw_line(c,-3,29,3,29);
+		this.draw_line(c,-8,18,8,18);
+		this.draw_line(c,-3,22,3,22);
+		
+		this.draw_text(c,"-",14,40,12,8);
+		this.draw_text(c,"+",14,0,12,8);
+				//this.draw_line(c,8,6,16,6);
+	    /*} else if (this.type == 'i') {  // current pile
 		// draw arrow: pos to neg
 		this.draw_line(c,0,15,0,32);
 		this.draw_line(c,-3,26,0,32);
@@ -6789,208 +7466,19 @@ schematic = (function() {
 		}*/
 
 		if (this.properties.name)
-			this.draw_text(c,this.properties.name,-16,24,5,property_size);
-		if (this.properties.value) {
-			//this.draw_text(c,this.properties.value,16,24,3,property_size);
-			let index = this.properties.value.indexOf('(');
-			let fun = i18n[this.properties.value.slice(0,index)];   // translation of function name before the "("
-			let params = this.properties.value.slice(index);   		// parameters after the "("
-			this.draw_text(c,fun+params,16,24,3,property_size);
-		}
+			this.draw_text(c,this.properties.name,20,18,2,property_size);
+			if (this.properties.r)
+			this.draw_text(c,this.properties.r +'V',20,30,2,property_size);
+			
+		
+	};
+	
+
+	batterie.prototype.clone = function(x,y) {
+		return new batterie(x,y,this.rotation,this.properties.name,this.properties.r);
 	};
 
-// map source function name to labels for each source parameter
-	var source_functions = {
-		'dc': ['DC_value'],
-
-		'impulse': ['Height',
-			'Width'],
-
-		'step': ['Initial_value',
-			'Plateau_value',
-			'Delay_until_step',
-			'Rise_time'],
-
-		'square': ['Initial_value',
-			'Plateau_value',
-			'Frequency',
-			'Duty_cycle'],
-
-		'triangle': ['Initial_value',
-			'Plateau_value',
-			'Frequency'],
-
-		'pwl': ['Comma_separated_list'],
-
-		'pwl_repeating': ['Comma_separated_list'],
-
-		'pulse': ['Initial_value',
-			'Plateau_value',
-			'Delay_until_pulse',
-			'Time_for_first_transition',
-			'Time_for_second_transition',
-			'Pulse_width',
-			'Period'],
-
-		'sin': ['Offset_value',
-			'Amplitude',
-			'Frequency',
-			'Delay_until_sin_starts',
-			'Phase_offset_degrees']
-	};
-
-	// build property editor div
-	Source.prototype.build_content = function(src) {
-	    // make an <input> widget for each property
-	    var fields = [];
-	    fields.name = build_input('text',10,this.properties.name);
-
-	    if (src == undefined) {
-	    	fields.value = this.properties.value;
-	    } else {
-			// fancy version: add select tag for source type
-			var src_types = [];
-			for (let t in source_functions) src_types.push(t);
-			var type_select = build_select(src_types,src.fun);
-			type_select.component = this;
-			type_select.addEventListener('change',source_type_changed,false);
-			fields.type = type_select;
-
-			if (src.fun == 'pwl' || src.fun == 'pwl_repeating') {		//WMc fixed bug in original MIT code src.run
-				var v = '';
-				var first = true;
-				for (let i = 0; i < src.args.length; i++) {
-					if (first) first = false;
-					else v += ',';
-					v += engineering_notation(src.args[i],3);
-					if (i % 2 == 0) v += 's';
-				}
-				fields[source_functions[src.fun][0]] = build_input('text',30,v);
-			} else {
-			    // followed separate input tag for each parameter
-			    var labels = source_functions[src.fun];
-			    for (let i = 0; i < labels.length; i++) {
-			    	let v = engineering_notation(src.args[i],3);
-			    	fields[labels[i]] = build_input('text',10,v);
-			    }
-			}
-		}
-
-		var div = this.content;
-		if (div.hasChildNodes())
-			div.removeChild(div.firstChild);  // remove table of input fields
-			div.appendChild(build_table(fields));
-			div.fields = fields;
-			div.component = this;
-			return div;
-	};
-
-	function source_type_changed(event) {
-		if (!event) event = window.event;
-		var select = event.target;
-
-	    // see where to get source parameters from
-	    var type = select.options[select.selectedIndex].value;
-	    var src = undefined;
-	    if (this.src != undefined && type == this.src.fun)
-	    	src = this.src;
-	    else if (typeof cktsim != 'undefined')
-	    	src = cktsim.parse_source(type+'()');
-
-	    select.component.build_content(src);
-	}
-
-	Source.prototype.edit_properties = function(x,y) {
-		if (this.near(x,y)) {
-			this.src = undefined;
-			if (typeof cktsim != 'undefined')
-				this.src = cktsim.parse_source(this.properties.value);
-			var content = this.build_content(this.src);
-
-			this.sch.dialog(i18n.Edit_Properties,content,function(content) {
-				var c = content.component;
-				var fields = content.fields;
-
-				var first = true;
-				var value = '';
-				for (let label in fields) {
-					if (label == 'name') 
-						c.properties.name = fields.name.value;
-					else if (label == 'value')  {
-				// if unknown source type
-				value = fields.value.value;
-				c.sch.redraw_background();
-				return;
-			} else if (label == 'type') {
-				var select = fields.type;
-				value = select.options[select.selectedIndex].value + '(';
-			} else {
-				if (first) first = false;
-				else value += ',';
-				value += fields[label].value;
-			}
-		}
-		c.properties.value = value + ')';
-			c.sch.redraw_background();
-		});
-			return true;
-		} else return false;
-	};
-
-	function VSource(x,y,rotation,name,value) {
-		Source.call(this,x,y,rotation,name,'v',value);
-		this.type = 'v';
-	}
-	VSource.prototype = new Component();
-	VSource.prototype.constructor = VSource;
-	VSource.prototype.toString = Source.prototype.toString;
-	VSource.prototype.draw = Source.prototype.draw;
-	VSource.prototype.clone = Source.prototype.clone;
-	VSource.prototype.build_content = Source.prototype.build_content;
-	VSource.prototype.edit_properties = Source.prototype.edit_properties;
-
-	// display current for DC analysis
-	VSource.prototype.display_current = function(c,vmap) {
-		var name = this.properties.name;
-		var label = 'I(' + (name ? name : '_' + this.properties._json_) + ')';
-		var v = vmap[label];
-		if (v != undefined) {
-			// first draw some solid blocks in the background
-			c.globalAlpha = 0.5;
-			this.draw_text(c,'\u2588\u2588\u2588',-8,8,4,annotation_size,element_style);
-			c.globalAlpha = 1.0;
-
-			// display the element current 
-			var i = engineering_notation(v,2) + 'A';
-			this.draw_text(c,i,-3,5,5,annotation_size,annotation_style);
-			// draw arrow for current
-			this.draw_line(c,-3,4,0,8);
-			this.draw_line(c,3,4,0,8);
-			// only display each current once
-			delete vmap[label];
-		}
-	};
-
-	VSource.prototype.clone = function(x,y) {
-		return new VSource(x,y,this.rotation,this.properties.name,this.properties.value);
-	};
-
-	function ISource(x,y,rotation,name,value) {
-		Source.call(this,x,y,rotation,name,'i',value);
-		this.type = 'i';
-	}
-	ISource.prototype = new Component();
-	ISource.prototype.constructor = ISource;
-	ISource.prototype.toString = Source.prototype.toString;
-	ISource.prototype.draw = Source.prototype.draw;
-	ISource.prototype.clone = Source.prototype.clone;
-	ISource.prototype.build_content = Source.prototype.build_content;
-	ISource.prototype.edit_properties = Source.prototype.edit_properties;
-
-	ISource.prototype.clone = function(x,y) {
-	return new ISource(x,y,this.rotation,this.properties.name,this.properties.value);
-	};
-
+	
 	///////////////////////////////////////////////////////////////////////////////
 	//
 	//  JQuery slider support for setting a component value
