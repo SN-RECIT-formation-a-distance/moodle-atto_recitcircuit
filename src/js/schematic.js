@@ -14,7 +14,7 @@
 
 /*jshint esversion: 6 */
 
-var i18n;	//internationalization translated strings
+/*var i18n;*/	//internationalization translated strings
 
 var cktsim = (function() {
 	///////////////////////////////////////////////////////////////////////////////
@@ -115,8 +115,8 @@ var cktsim = (function() {
 			    if (rGV < n_vsrc) {
 			    	//alert('Warning!!! Circuit has a voltage pile loop or a pile or current probe shorted by a wire, please remove the pile or the wire causing the short.');
 			    	//alert('Warning!!! Simulator might produce meaningless results or no result with illegal circuits.');
-			    	alert(i18n.ckt_alert1);
-			    	alert(i18n.ckt_alert2);
+			    	alert(window.parent.M.str.atto_circuit.ckt_alert1);
+			    	alert(window.parent.M.str.atto_circuit.ckt_alert2);
 			    	return false;		
 			    }
 			}
@@ -176,7 +176,9 @@ var cktsim = (function() {
 		else if (type == 'l')	// inductor
 			this.l(connections[0],connections[1],properties.l,name);
 		else if (type == 'v') 	// voltage pile
-			this.r(connections[0],connections[1],properties.r,name);
+			this.v(connections[0],connections[1],properties.v,name);
+		else if (type == 'volt') 	// voltage pile
+			this.v(connections[0],connections[1],properties.volt,name);
 		else if (type == 'vb') 	// voltage pile
 			this.r(connections[0],connections[1],properties.r,name);
 		else if (type == 'i') 	// current pile
@@ -201,12 +203,12 @@ var cktsim = (function() {
 
 	    if (!found_ground) { // No ground on schematic
 	    	//alert('Please make at least one connection to ground (triangle symbol)');
-	    	alert(i18n.ckt_alert3);
+	    	alert(window.parent.M.str.atto_circuit.ckt_alert3);
 
 		/*	var content = document.createElement('div');
-			var strAlert = document.createTextNode(i18n.ckt_alert3);
+			var strAlert = document.createTextNode(window.parent.M.str.atto_circuit.ckt_alert3);
 			content.appendChild(strAlert);
-		    this.dialog(i18n.Alert,content);
+		    this.dialog(window.parent.M.str.atto_circuit.Alert,content);
 
 	    	return false;	*/
 	    }
@@ -326,10 +328,10 @@ var cktsim = (function() {
 	    // too many iterations
 	    if (this.current_piles.length > 0) {
 	    	//alert('Newton Method Failed, do your current piles have a conductive path to ground?');
-	    	alert(i18n.ckt_alert4);
+	    	alert(window.parent.M.str.atto_circuit.ckt_alert4);
 	    } else {
 	    	//alert('Newton Method Failed, it may be your circuit or it may be our simulator.');
-	    	alert(i18n.ckt_alert5);
+	    	alert(window.parent.M.str.atto_circuit.ckt_alert5);
 	    }
 
 	    return undefined;
@@ -429,7 +431,7 @@ var cktsim = (function() {
 	    if ((this.diddc == false) && (no_dc == false)) {
 			if (this.dc() == undefined) { // DC failed, realloc mats and vects.
 				//alert('DC failed, trying transient analysis from zero.');		    
-				alert(i18n.ckt_alert6);		    
+				alert(window.parent.M.str.atto_circuit.ckt_alert6);		    
 			    this.finalized = false;  // Reset the finalization.
 			    if (this.finalize() == false) 
 			    	return undefined;
@@ -640,8 +642,8 @@ var cktsim = (function() {
             if (this.device_map[pile_name] === undefined) {
             	//alert('AC analysis refers to unknown pile ' + pile_name);
             	//return 'AC analysis failed, unknown pile';            	
-            	alert(i18n.ckt_alert7 + pile_name);
-            	return i18n.ckt_alert8;
+            	alert(window.parent.M.str.atto_circuit.ckt_alert7 + pile_name);
+            	return window.parent.M.str.atto_circuit.ckt_alert8;
             }
             this.device_map[pile_name].load_ac(this,this.rhs);
 
@@ -724,7 +726,7 @@ var cktsim = (function() {
 	    		this.device_map[name] = d;
 	    	else {
 	    		//alert('Warning: two circuit elements share the same name ' + name);
-	    		alert(i18n.ckt_warning1 + name);
+	    		alert(window.parent.M.str.atto_circuit.ckt_warning1 + name);
 	    		this.device_map[name] = d;
 	    	}
 	    }
@@ -742,6 +744,18 @@ var cktsim = (function() {
 	    	let d = new Resistor(n1,n2,v);
 	    	return this.add_device(d, name);
 	    } else return this.v(n1,n2,'0',name);   // zero resistance == 0V voltage pile
+	};
+	Circuit.prototype.volt = function(n1,n2,volt,name) {
+	    // try to convert string value into numeric value, barf if we can't
+	    if ((typeof volt) == 'string') {
+	    	volt = parse_number(v,undefined);
+	    	if (volt === undefined) return undefined;
+	    }
+
+	    if (volt != 0) {
+	    	let d = new Resistor(n1,n2,v);
+	    	return this.add_device(d, name);
+	    } else return this.volt(n1,n2,'0',name);   // zero resistance == 0V voltage pile
 	};
 	Circuit.prototype.rv = function(n1,n2,v,name) {
 	    // try to convert string value into numeric value, barf if we can't
@@ -1029,7 +1043,7 @@ Circuit.prototype.f = function(n1,n2,area,type,name) {
 
     	if (n != b.length || m != x.length)
     		//throw 'Rows of M mismatched to b or cols mismatch to x.';
-    		throw i18n.ckt_error1;
+    		throw window.parent.M.str.atto_circuit.ckt_error1;
 
     	for (let i = 0; i < n; i++) {
     		let temp = 0;
@@ -1045,10 +1059,10 @@ Circuit.prototype.f = function(n1,n2,area,type,name) {
 
     	if (n > B.length || m > B[0].length)
     		//throw 'Row or columns of A to large for B';
-    		throw i18n.ckt_error2;
+    		throw window.parent.M.str.atto_circuit.ckt_error2;
     	if (n > C.length || m > C[0].length)
     		//throw 'Row or columns of A to large for C';
-    		throw i18n.ckt_error3;
+    		throw window.parent.M.str.atto_circuit.ckt_error3;
     	if ((typeof scalea == 'number') && (typeof scaleb == 'number'))
     		for (let i = 0; i < n; i++)
     			for (let j = 0; j < m; j++)
@@ -1063,7 +1077,7 @@ Circuit.prototype.f = function(n1,n2,area,type,name) {
     								C[i][j] = scalea[i]*A[i][j] + scaleb[i]*B[i][j];
     							else
     								//throw 'scalea and scaleb must be scalars or Arrays';
-    								throw i18n.ckt_error4;
+    								throw window.parent.M.str.atto_circuit.ckt_error4;
     }
 
     // Returns a vector of ones and zeros, ones denote algebraic
@@ -1095,7 +1109,7 @@ Circuit.prototype.f = function(n1,n2,area,type,name) {
     	var m = src[0].length;
     	if (n > dest.length || m >  dest[0].length)
     		//throw 'Rows or cols > rows or cols of dest';
-    		throw i18n.ckt_error5;
+    		throw window.parent.M.str.atto_circuit.ckt_error5;
 
     	for (let i = 0; i < n; i++)
     		for (let j = 0; j < m; j++)
@@ -1107,7 +1121,7 @@ Circuit.prototype.f = function(n1,n2,area,type,name) {
     	var m = src[0].length;
     	if (n > dest[0].length || m >  dest.length)
     		//throw 'Rows or cols > cols or rows of dest';
-    		throw i18n.ckt_error6;
+    		throw window.parent.M.str.atto_circuit.ckt_error6;
 
     	for (let i = 0; i < n; i++)
     		for (let j = 0; j < m; j++)
@@ -2586,27 +2600,27 @@ schematic = (function() {
 	var property_size = 7;  					// point size for Component property text
 	var annotation_size = 7;  					// point size for diagram annotations
     var parts_map = {
-    	//'g': [Ground, i18n.Ground_connection],
-    	//'L': [Label, i18n.Node_label],
-		'v': [Pile, i18n.Voltage_pile],
-		'f': [fusible, i18n.fusible],
-		'vb': [batterie, i18n.Voltage_Batterie],
-	//	'i': [IPile, i18n.Current_pile],
-	'io': [Interrupteurbascule, i18n.Interrupteurbascule],
-		'r': [Resistor, i18n.Resistor],
-		//'rv': [Resistorvariable, i18n.Resistorvariable],
-		'vm': [mesure, i18n.mesure],
-		'vo': [moteur, i18n.moteur],
-    	'c': [Capacitor, i18n.Capacitor],
-    	//'l': [Inductor, i18n.Inductor],
-    	//'o': [OpAmp, i18n.Op_Amp],
-    	'd': [Diode, i18n.Diode],
-    	//'p': [PFet, i18n.PFet],
-    	//'n': [NFet, i18n.NFet],
-	    //'pnp': [PNP, i18n.PNP],
-	    //'npn': [NPN, i18n.NPN],
-    	/*'s': [Probe, i18n.Voltage_probe],*/
-    	/*'a': [Ammeter, i18n.Current_probe]*/
+    	//'g': [Ground, window.parent.M.str.atto_circuit.Ground_connection],
+    	//'L': [Label, window.parent.M.str.atto_circuit.Node_label],
+		'v': [Pile, window.parent.M.str.atto_circuit.Voltage_pile],
+		'f': [fusible, window.parent.M.str.atto_circuit.fusible],
+		//'vb': [batterie, window.parent.M.str.atto_circuit.Voltage_Batterie],
+	//	'i': [IPile, window.parent.M.str.atto_circuit.Current_pile],
+	'io': [Interrupteurbascule, window.parent.M.str.atto_circuit.Interrupteurbascule],
+		'r': [Resistor, window.parent.M.str.atto_circuit.Resistor],
+		//'rv': [Resistorvariable, window.parent.M.str.atto_circuit.Resistorvariable],
+		'vm': [mesure, window.parent.M.str.atto_circuit.mesure],
+		'vo': [moteur, window.parent.M.str.atto_circuit.moteur],
+    	'c': [Capacitor, window.parent.M.str.atto_circuit.Capacitor],
+    	//'l': [Inductor, window.parent.M.str.atto_circuit.Inductor],
+    	//'o': [OpAmp, window.parent.M.str.atto_circuit.Op_Amp],
+    	'd': [Diode, window.parent.M.str.atto_circuit.Diode],
+    	//'p': [PFet, window.parent.M.str.atto_circuit.PFet],
+    	//'n': [NFet, window.parent.M.str.atto_circuit.NFet],
+	    //'pnp': [PNP, window.parent.M.str.atto_circuit.PNP],
+	    //'npn': [NPN, window.parent.M.str.atto_circuit.NPN],
+    	/*'s': [Probe, window.parent.M.str.atto_circuit.Voltage_probe],*/
+    	/*'a': [Ammeter, window.parent.M.str.atto_circuit.Current_probe]*/
     };
 
 	// global clipboard
@@ -2689,44 +2703,44 @@ schematic = (function() {
 	    this.toolbar = [];
 
 	    if (!this.diagram_only) {
-	    	this.tools.help = this.add_tool(help_icon,i18n.Help,this.help);
+	    	this.tools.help = this.add_tool(help_icon,window.parent.M.str.atto_circuit.Help,this.help);
 	    	this.enable_tool('help',true);		} 
 
 		if (this.edits_allowed) {
-			this.tools.grid = this.add_tool(grid_icon,i18n.Grid,this.toggle_grid);
+			this.tools.grid = this.add_tool(grid_icon,window.parent.M.str.atto_circuit.Grid,this.toggle_grid);
 			this.enable_tool('grid',true);
 
-		    /*this.tools.open = this.add_tool(open_icon,i18n.Open_netlist,this.open_netlist);
+		    /*this.tools.open = this.add_tool(open_icon,window.parent.M.str.atto_circuit.Open_netlist,this.open_netlist);
 		    this.enable_tool('open',true);*/
 
-			/*this.tools.link = this.add_tool(link_icon,i18n.Link_tip,this.share_link);
+			/*this.tools.link = this.add_tool(link_icon,window.parent.M.str.atto_circuit.Link_tip,this.share_link);
 			this.enable_tool('link',true);*/
 
-		    /*this.tools.save = this.add_tool(save_icon,i18n.Save_netlist,this.save_netlist);
+		    /*this.tools.save = this.add_tool(save_icon,window.parent.M.str.atto_circuit.Save_netlist,this.save_netlist);
 			this.enable_tool('save',true);  
 
-			this.tools.exportasimage = this.add_tool(exportasimage_icon,i18n.Exportasimage_netlist,this.exportasimage_netlist);
+			this.tools.exportasimage = this.add_tool(exportasimage_icon,window.parent.M.str.atto_circuit.Exportasimage_netlist,this.exportasimage_netlist);
 		    this.enable_tool('exportasimage',true); */
 
-			this.tools.cut = this.add_tool(cut_icon,i18n.Cut,this.cut);
-			this.tools.copy = this.add_tool(copy_icon,i18n.Copy,this.copy);
-			this.tools.paste = this.add_tool(paste_icon,i18n.Paste,this.paste);
+			this.tools.cut = this.add_tool(cut_icon,window.parent.M.str.atto_circuit.Cut,this.cut);
+			this.tools.copy = this.add_tool(copy_icon,window.parent.M.str.atto_circuit.Copy,this.copy);
+			this.tools.paste = this.add_tool(paste_icon,window.parent.M.str.atto_circuit.Paste,this.paste);
 
-			this.tools.delete = this.add_tool(delete_icon,i18n.Delete,this.delete_selected);
-			this.tools.rotate = this.add_tool(rotate_icon,i18n.Rotate,this.rotate_selected);
+			this.tools.delete = this.add_tool(delete_icon,window.parent.M.str.atto_circuit.Delete,this.delete_selected);
+			this.tools.rotate = this.add_tool(rotate_icon,window.parent.M.str.atto_circuit.Rotate,this.rotate_selected);
 			//this.tools.spacer = this.add_tool(spacer_icon,'',this.rotate_selected);
 		}
 
 	    // simulation interface if cktsim.js is loaded
 	    /*if (typeof cktsim != 'undefined') {
 	    	if (analyses.indexOf('dc') != -1) {
-	    		this.tools.dc = this.add_tool('DC',i18n.Perform_DC_Analysis,this.dc_analysis);
+	    		this.tools.dc = this.add_tool('DC',window.parent.M.str.atto_circuit.Perform_DC_Analysis,this.dc_analysis);
 	    		this.enable_tool('dc',true);
 		    this.dc_max_iters = '1000';  // default values dc solution
 			}
 
 			if (analyses.indexOf('ac') != -1) {
-				this.tools.ac = this.add_tool('AC',i18n.Perform_AC_Analysis,this.setup_ac_analysis);
+				this.tools.ac = this.add_tool('AC',window.parent.M.str.atto_circuit.Perform_AC_Analysis,this.setup_ac_analysis);
 				this.enable_tool('ac',true);
 			    this.ac_npts = '50'; // default values for AC Analysis
 			    this.ac_fstart = '10';
@@ -2735,7 +2749,7 @@ schematic = (function() {
 			}
 
 			if (analyses.indexOf('tran') != -1) {
-				this.tools.tran = this.add_tool('TRAN',i18n.Perform_Transient_Analysis,this.transient_analysis);
+				this.tools.tran = this.add_tool('TRAN',window.parent.M.str.atto_circuit.Perform_Transient_Analysis,this.transient_analysis);
 				this.enable_tool('tran',true);
 			    this.tran_npts = '100';  // default values for transient analysis
 			    this.tran_tstop = '0.01';
@@ -3147,7 +3161,7 @@ schematic = (function() {
 	};
 
 	Schematic.prototype.help = function() {
-	/* Embedded help strings come from i18n files: en-US.js, es.js, and the like.	*/
+	/* Embedded help strings come from window.parent.M.str.atto_circuit files: en-US.js, es.js, and the like.	*/
 		let strHelp = strSHelp + strAddC + strAddW + strSel + strMove + strDel + strRot + strProp + strNum;
 		window.confirm(strHelp);
 	};
@@ -3482,7 +3496,7 @@ schematic = (function() {
 		content.fields = fields;
 		content.sch = this;
 
-		this.dialog(i18n.Sharable_Link,content,function(content) {
+		this.dialog(window.parent.M.str.atto_circuit.Sharable_Link,content,function(content) {
 			return null;
 		});
 
@@ -3520,7 +3534,7 @@ schematic = (function() {
 			content.fields = fields;
 			content.sch = this;
 
-			this.dialog(i18n.Open_netlist,content,function(content) {
+			this.dialog(window.parent.M.str.atto_circuit.Open_netlist,content,function(content) {
 				var sch = content.sch;
 
 			    // retrieve parameters, remember for next time
@@ -3613,7 +3627,7 @@ schematic = (function() {
 
 		if (this.find_probes().length == 0) {
 			//alert("AC Analysis: add a voltage probe to the diagram!");
-			alert(i18n.AC_Analysis_add_a_voltage_probe);
+			alert(window.parent.M.str.atto_circuit.AC_Analysis_add_a_voltage_probe);
 			return;
 		}
 
@@ -3626,7 +3640,7 @@ schematic = (function() {
 		content.fields = fields;
 		content.sch = this;
 
-		this.dialog(i18n.AC_Analysis,content,function(content) {
+		this.dialog(window.parent.M.str.atto_circuit.AC_Analysis,content,function(content) {
 			var sch = content.sch;
 
 		    // retrieve parameters, remember for next time
@@ -3699,13 +3713,13 @@ schematic = (function() {
 		var all_max = array_max(probe_maxv);
 		if (all_max < 1.0e-16) {
 			//alert('Zero ac response, -infinity on DB scale.');
-			alert(i18n.Zero_ac_response);
+			alert(window.parent.M.str.atto_circuit.Zero_ac_response);
 		} else {
 			for (let i = probes.length - 1; i >= 0; --i) {
 				if (probes[i][3] != 'voltage') continue;
 				if ((probe_maxv[i] / all_max) < 1.0e-10) {
 					//alert('Near zero ac response, remove ' + probe_color[i] + ' probe');
-					alert(i18n.Near_zero_ac_response + probe_color[i] + i18n.probe);
+					alert(window.parent.M.str.atto_circuit.Near_zero_ac_response + probe_color[i] + window.parent.M.str.atto_circuit.probe);
 					return;
 				}
 			}
@@ -3729,10 +3743,10 @@ schematic = (function() {
 		}
 
 		// graph the result and display in a window
-		var graph2 = this.graph(x_values,i18n.log_Frequency,z_values,i18n.degrees);
-		this.window(i18n.AC_Phase,graph2,0,true);
-		var graph1 = this.graph(x_values,i18n.log_Frequency,y_values,'dB');
-		this.window(i18n.AC_Magnitude,graph1,50,true);
+		var graph2 = this.graph(x_values,window.parent.M.str.atto_circuit.log_Frequency,z_values,window.parent.M.str.atto_circuit.degrees);
+		this.window(window.parent.M.str.atto_circuit.AC_Phase,graph2,0,true);
+		var graph1 = this.graph(x_values,window.parent.M.str.atto_circuit.log_Frequency,y_values,'dB');
+		this.window(window.parent.M.str.atto_circuit.AC_Magnitude,graph1,50,true);
 		}
 	};
 
@@ -3744,7 +3758,7 @@ schematic = (function() {
 		var tstop_lbl = 'Stop_time_seconds';
 		var probes = this.find_probes();
 		if (probes.length == 0) {
-			alert(i18n.Transient_Analysis_add_a_probe);
+			alert(window.parent.M.str.atto_circuit.Transient_Analysis_add_a_probe);
 			return;
 		}
 
@@ -3755,7 +3769,7 @@ schematic = (function() {
 		content.fields = fields;
 		content.sch = this;
 
-		this.dialog(i18n.Transient_Analysis,content,function(content) {
+		this.dialog(window.parent.M.str.atto_circuit.Transient_Analysis,content,function(content) {
 			var sch = content.sch;
 			var ckt = sch.extract_circuit();
 			if (ckt === null) return;
@@ -3804,7 +3818,7 @@ schematic = (function() {
 				}
 
 				var x_values = results._time_;
-				var x_legend = i18n.Time;
+				var x_legend = window.parent.M.str.atto_circuit.Time;
 
 				// set up plot values for each node with a probe
 				var v_values = [];  // voltage values: list of [color, result_array]
@@ -3817,23 +3831,23 @@ schematic = (function() {
 					let offset = cktsim.parse_number(probes[i][2]);
 					let v = results[label];
 					if (v == undefined) {
-						alert(i18n.The + color + i18n.probe_is_connected_to_node + '"' + label + '"' + i18n.which_is_not_an_actual_circuit_node);
+						alert(window.parent.M.str.atto_circuit.The + color + window.parent.M.str.atto_circuit.probe_is_connected_to_node + '"' + label + '"' + window.parent.M.str.atto_circuit.which_is_not_an_actual_circuit_node);
 					} else if (probes[i][3] == 'voltage') {
 						if (color == 'xaxis') {
 							x_values = v;
-							x_legend = i18n.Voltage;
+							x_legend = window.parent.M.str.atto_circuit.Voltage;
 						} else v_values.push([color,offset,v]);
 					} else {
 						if (color == 'xaxis') {
 							x_values = v;
-							x_legend = i18n.Current;
+							x_legend = window.parent.M.str.atto_circuit.Current;
 						} else i_values.push([color,offset,v]);
 					}
 				}
 
 				// graph the result and display in a window
-				var graph = sch.graph(x_values,x_legend,v_values,i18n.Voltage,i_values,i18n.Current);
-				sch.window(i18n.Transient_Analysis,graph,0, true);
+				var graph = sch.graph(x_values,x_legend,v_values,window.parent.M.str.atto_circuit.Voltage,i_values,window.parent.M.str.atto_circuit.Current);
+				sch.window(window.parent.M.str.atto_circuit.Transient_Analysis,graph,0, true);
 			}
 		});
 	};
@@ -4659,7 +4673,7 @@ schematic = (function() {
 
 	    // build a row for each element in associative array
 	    for (let i in a) {
-	    	var label = document.createTextNode(i18n[i] + ': ');	//row labels are translated here
+	    	var label = document.createTextNode(window.parent.M.str.atto_circuit[i] + ': ');	//row labels are translated here
 	    	var col1 = document.createElement('td');
 	    	col1.appendChild(label);
 	    	var col2 = document.createElement('td');
@@ -4695,7 +4709,7 @@ schematic = (function() {
 		for (let i = 0; i < options.length; i++) {
 			var option = document.createElement('option');
 			option.value = options[i];			//value is the English field name in a dropdown list (if omitted, defaults to option.text)
-			option.text = i18n[options[i]];		//text in a dropdown list are translated here
+			option.text = window.parent.M.str.atto_circuit[options[i]];		//text in a dropdown list are translated here
 			select.add(option);
 			if (options[i] == selected) select.selectedIndex = i;
 		}
@@ -5679,7 +5693,7 @@ schematic = (function() {
 		var part = canvas.partw;		//WMc
 
 	    canvas.style.borderColor = border_style;
-	    part.sch.message(part.tip+i18n.drag_onto_diagram);
+	    part.sch.message(part.tip+window.parent.M.str.atto_circuit.drag_onto_diagram);
 	    //part.sch.message(part.tip);
 	    return false;
 	}
@@ -6034,7 +6048,7 @@ schematic = (function() {
 		content.fields = fields;
 		content.component = this;
 
-		this.sch.dialog(i18n.Edit_Properties,content,function(content) {
+		this.sch.dialog(window.parent.M.str.atto_circuit.Edit_Properties,content,function(content) {
 			for (let i in content.fields)
 				content.component.properties[i] = content.fields[i].value;
 			content.component.sch.redraw_background();
@@ -6116,7 +6130,7 @@ schematic = (function() {
 			// possibly label other cp's for this device?
 			this.parent.propagate_label(label);
 		} else if (this.label != '0' && label != '0' && this.label != label)
-			alert(i18n.Node_has_two_conflicting_labels+this.label+', '+label);
+			alert(window.parent.M.str.atto_circuit.Node_has_two_conflicting_labels+this.label+', '+label);
 	};
 
 	ConnectionPoint.prototype.update_location = function() {
@@ -6391,7 +6405,7 @@ schematic = (function() {
 	////////////////////////////////////////////////////////////////////////////////
 
 	var probe_colors = ['red','green','blue','cyan','magenta','orange','black','xaxis'];
-	// var probe_cnames = i18n_probe_cnames;	// color names, see i18n string file, en-US.js, etc.
+	// var probe_cnames = window.parent.M.str.atto_circuit_probe_cnames;	// color names, see window.parent.M.str.atto_circuit string file, en-US.js, etc.
 
 	var probe_colors_rgb = {
 		'red': 'rgb(232,77,57)',
@@ -6461,7 +6475,7 @@ schematic = (function() {
 			content.fields = fields;
 			content.component = this;
 
-			this.sch.dialog(i18n.Edit_Properties,content,function(content) {
+			this.sch.dialog(window.parent.M.str.atto_circuit.Edit_Properties,content,function(content) {
 				var color_choice = content.fields.Plot_color;
 				content.component.properties.color = probe_colors[color_choice.selectedIndex];
 				content.component.properties.offset = content.fields.Plot_offset.value;
@@ -6628,7 +6642,7 @@ schematic = (function() {
 			content.fields = fields;
 			content.component = this;
 
-			this.sch.dialog(i18n.Edit_Properties,content,function(content) {
+			this.sch.dialog(window.parent.M.str.atto_circuit.Edit_Properties,content,function(content) {
 				content.component.properties.name = content.fields.name.value;
 				content.component.properties.type = Mesure_types[content.fields.type.selectedIndex];
 				content.component.sch.redraw_background();
@@ -6749,7 +6763,7 @@ schematic = (function() {
 			content.fields = fields;
 			content.component = this;
 
-			this.sch.dialog(i18n.Edit_Properties,content,function(content) {
+			this.sch.dialog(window.parent.M.str.atto_circuit.Edit_Properties,content,function(content) {
 				content.component.properties.name = content.fields.name.value;
 				content.component.properties.type = Interrupteurbascule_types[content.fields.type.selectedIndex];
 				content.component.sch.redraw_background();
@@ -7026,10 +7040,10 @@ schematic = (function() {
 
 	var diode_types = ['normal','DEL'];
 
-	function Diode(x,y,rotation,name,area,type) {
+	function Diode(x,y,rotation,name,type) {
 		Component.call(this,'d',x,y,rotation);
 		this.properties.name = name;
-		this.properties.area = area ? area : '1';
+		//this.properties.area = area ? area : '1';
 		this.properties.type = type ? type : 'normal';
 	    this.add_connection(0,-24);   // anode
 	    this.add_connection(0,24);  // cathode
@@ -7040,7 +7054,7 @@ schematic = (function() {
 	Diode.prototype.constructor = Diode;
 
 	Diode.prototype.toString = function() {
-		return '<Diode '+this.properties.area+' ('+this.x+','+this.y+')>';
+		return '<Diode  ('+this.x+','+this.y+')>';
 	};
 
 	Diode.prototype.draw = function(c) {
@@ -7091,16 +7105,16 @@ schematic = (function() {
 		if (inside(this.bbox,x,y)) {
 			var fields = [];
 			fields.name = build_input('text',10,this.properties.name);
-			fields.area = build_input('text',10,this.properties.area);
+			//fields.area = build_input('text',10,this.properties.area);
 			fields.type = build_select(diode_types,this.properties.type);
 
 			var content = build_table(fields);
 			content.fields = fields;
 			content.component = this;
 
-			this.sch.dialog(i18n.Edit_Properties,content,function(content) {
+			this.sch.dialog(window.parent.M.str.atto_circuit.Edit_Properties,content,function(content) {
 				content.component.properties.name = content.fields.name.value;
-				content.component.properties.area = content.fields.area.value;
+				//content.component.properties.area = content.fields.area.value;
 				content.component.properties.type = diode_types[content.fields.type.selectedIndex];
 				content.component.sch.redraw_background();
 			});
@@ -7372,11 +7386,12 @@ schematic = (function() {
 	//  Pile
 	//
 	////////////////////////////////////////////////////////////////////////////////
-	
-	function Pile(x,y,rotation,name,type,r) {
+	var Pile_types = ['Voltage_pile','Voltage_Batterie'];
+	function Pile(x,y,rotation,name,type,volt) {
 		Component.call(this,type,x,y,rotation);
 		this.properties.name = name;
-		this.properties.r = r ? r : '10';
+		this.properties.volt = volt ? volt : '10';
+		this.properties.type = type ? type : 'Voltage_pile';
 		this.add_connection(0,0);
 		this.add_connection(0,48);
 		this.bounding_box = [-12,0,12,48];
@@ -7387,35 +7402,81 @@ schematic = (function() {
 	Pile.prototype.constructor = Pile;
 
 	Pile.prototype.toString = function() {
-		return '<Pile '+this.properties.r+' ('+this.x+','+this.y+')>';
+		return '<Pile '+this.properties.volt+' ('+this.x+','+this.y+')>';
 	};
 
 	Pile.prototype.draw = function(c) {
-	    Component.prototype.draw.call(this,c);   // give superclass a shot
+		Component.prototype.draw.call(this,c);   // give superclass a shot
+		
+		if (this.properties.type == 'Voltage_pile') {
+			// put a box around an ideal diode
+			this.draw_line(c,0,0,0,22);
+			//this.draw_circle(c,0,24,12,false);
+			this.draw_line(c,0,26,0,48);
+	
+	
+	
+			
+					// voltage pile
+			// draw + and -
+			//this.draw_line(c,12,12,12,0);
+			
+			//this.draw_line(c,6,6,18,6);
+			this.draw_line(c,-8,22,8,22);
+			this.draw_line(c,-3,26,3,26);
+			//this.draw_line(c,8,40,16,40);
+			
+		}
+
+			else{
+				// give superclass a shot
 	    this.draw_line(c,0,0,0,22);
 	    //this.draw_circle(c,0,24,12,false);
 	    this.draw_line(c,0,26,0,48);
 
 	    		// voltage pile
 		// draw + and -
-		//this.draw_line(c,12,12,12,0);
 		
-		//this.draw_line(c,6,6,18,6);
-		this.draw_line(c,-8,22,8,22);
-		this.draw_line(c,-3,26,3,26);
-		//this.draw_line(c,8,40,16,40);
-	    this.draw_text(c,"-",14,40,12,8);
-		this.draw_text(c,"+",14,0,12,8);
+		this.draw_line(c,-8,25,8,25);
+		this.draw_line(c,-3,29,3,29);
+		this.draw_line(c,-8,18,8,18);
+		this.draw_line(c,-3,22,3,22);
+		
+		
+			}
+	   
 				
+			this.draw_text(c,"-",14,40,12,8);
+			this.draw_text(c,"+",14,0,12,8);
 
 		if (this.properties.name)
 			this.draw_text(c,this.properties.name,20,18,2,property_size);
-			if (this.properties.r)
-			this.draw_text(c,this.properties.r +'V',20,30,2,property_size);
+			if (this.properties.volt)
+			this.draw_text(c,this.properties.volt +'V',20,30,2,property_size);
+	};
+	Pile.prototype.edit_properties = function(x,y) {
+		if (inside(this.bbox,x,y)) {
+			var fields = [];
+			fields.name = build_input('text',10,this.properties.name);
+			fields.volt = build_input('text',10,this.properties.volt);
+			fields.type = build_select(Pile_types,this.properties.type);
+
+			var content = build_table(fields);
+			content.fields = fields;
+			content.component = this;
+
+			this.sch.dialog(window.parent.M.str.atto_circuit.Edit_Properties,content,function(content) {
+				content.component.properties.name = content.fields.name.value;
+				content.component.properties.volt = content.fields.volt.value;
+				content.component.properties.type = Pile_types[content.fields.type.selectedIndex];
+				content.component.sch.redraw_background();
+			});
+			return true;
+		} else return false;
 	};
 
 	Pile.prototype.clone = function(x,y) {
-		return new Pile(x,y,this.rotation,this.properties.name,this.properties.r);
+		return new Pile(x,y,this.rotation,this.properties.name,this.properties.v);
 	};
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -7424,7 +7485,7 @@ schematic = (function() {
 	//
 	////////////////////////////////////////////////////////////////////////////////
 	
-	function batterie(x,y,rotation,name,type,r) {
+	/*function batterie(x,y,rotation,name,type,r) {
 		Component.call(this,type,x,y,rotation);
 		this.properties.name = name;
 		this.properties.r = r ? r : '10';
@@ -7457,14 +7518,14 @@ schematic = (function() {
 		
 		this.draw_text(c,"-",14,40,12,8);
 		this.draw_text(c,"+",14,0,12,8);
-				//this.draw_line(c,8,6,16,6);
+				//this.draw_line(c,8,6,16,6);*/
 	    /*} else if (this.type == 'i') {  // current pile
 		// draw arrow: pos to neg
 		this.draw_line(c,0,15,0,32);
 		this.draw_line(c,-3,26,0,32);
 		this.draw_line(c,3,26,0,32);
 		}*/
-
+/*
 		if (this.properties.name)
 			this.draw_text(c,this.properties.name,20,18,2,property_size);
 			if (this.properties.r)
@@ -7478,7 +7539,7 @@ schematic = (function() {
 		return new batterie(x,y,this.rotation,this.properties.name,this.properties.r);
 	};
 
-	
+	*/
 	///////////////////////////////////////////////////////////////////////////////
 	//
 	//  JQuery slider support for setting a component value

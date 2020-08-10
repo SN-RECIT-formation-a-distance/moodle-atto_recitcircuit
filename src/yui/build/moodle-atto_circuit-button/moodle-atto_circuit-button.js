@@ -84,7 +84,7 @@ YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
                 this.addButton({
                     icon: 'circuit',
                     iconComponent: 'atto_circuit',
-                    buttonName: "Circtuit",
+                    buttonName: "Circuit",
                     callback: this._displayDialogue,
                     //callbackArgs: icon,
                     //tags: 'img',
