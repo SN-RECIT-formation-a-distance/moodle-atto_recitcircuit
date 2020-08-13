@@ -1,5 +1,5 @@
 echo off
-set pluginPath=..\moodledev2\lib\editor\atto\plugins\circuit
+set pluginPath=..\moodledev3\lib\editor\atto\plugins\circuit
 
 rem remove the current link
 ..\outils\junction -d src
