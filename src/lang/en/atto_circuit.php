@@ -33,7 +33,7 @@ $string['storeinrepo_desc'] = 'If checked the circuit will be saved as a standar
     $string['error1'] =  'Sorry; there was a browser error in starting the schematic tool. We recommend using the latest versions of Firefox and Chrome.';
     $string['Ground_connection'] =  'Ground connection';
     $string['Node_label'] =  'Node label';
-    $string[' Voltage_source'] =  'Voltage source';
+    $string['Voltage_source'] =  'Voltage source';
     $string['Current_source'] =  'Current source';
     $string['Voltage_pile'] =  'Pile';
     $string['Voltage_Batterie'] =  'Batterie';
@@ -47,7 +47,7 @@ $string['storeinrepo_desc'] = 'If checked the circuit will be saved as a standar
     $string['NFet'] =  'NFet';
     $string['PFet'] =  'PFet';
     $string['NPN'] =  'NPN';
-    $string[' PNP'] =  'PNP';
+    $string['PNP'] =  'PNP';
     $string['mesure'] = 'Appareil de mesure'; //window.parent.M.str.atto_circuit.mesure
     $string['moteur'] = 'Moteur';
     $string['fusible'] = 'Fusible';
@@ -56,7 +56,7 @@ $string['storeinrepo_desc'] = 'If checked the circuit will be saved as a standar
     $string['Voltage_probe'] =  'Voltage probe';
     $string['Current_probe'] =  'Current probe';
     $string['drag_onto_diagram'] =  'drag or tap to insert';
-    $string[ 'Help'] =  'display the help page';
+    $string['Help'] =  'display the help page';
     $string['Grid']  = 'toggle grid display';
     $string['Link_tip'] = 'share a link to the circuit';
     $string['Cut'] =  'Cut selected components to the clipboard';
@@ -118,7 +118,7 @@ $string['storeinrepo_desc'] = 'If checked the circuit will be saved as a standar
     
     //Use creative phrasing to get this sentence to come out right'] =  
     // alert('The ' + color + ' probe is connected to node ' + '"' + label + '"' + '; which is not an actual circuit node');
-    $string['The probe_is_connected_to_node'] =  ' probe is connected to node ';
+    $string['probe_is_connected_to_node'] =  ' probe is connected to node ';
     $string['which_is_not_an_actual_circuit_node'] =  '; which is not an actual circuit node.';
     
     $string['Voltage'] =  'Voltage';
@@ -128,7 +128,7 @@ $string['storeinrepo_desc'] = 'If checked the circuit will be saved as a standar
     
     $string['DC_value'] =  'DC value';
     
-    $string[' impulse'] =  'impulse';
+    $string['impulse'] =  'impulse';
     $string['Height'] =  'Height';
     $string['Width'] =  'Width (secs)';
     
@@ -186,11 +186,11 @@ $string['storeinrepo_desc'] = 'If checked the circuit will be saved as a standar
     $string['red'] =  'red';
     $string['green'] =  'green';
     $string['blue'] =  'blue';
-    $string[' cyan'] =  'cyan';
+    $string['cyan'] =  'cyan';
     $string['magenta'] =  'magenta';
     $string['yellow'] =  'yellow';
     $string['orange'] =  'orange';
-    $string[' black'] =  'black';
+    $string['black'] =  'black';
     $string['xaxis'] =  'x axis';
     
     $string['Ics'] =  'Ics';

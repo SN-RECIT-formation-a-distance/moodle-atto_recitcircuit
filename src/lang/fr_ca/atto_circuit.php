@@ -34,7 +34,7 @@ $string['storeinrepo_desc'] = 'Si cette case est cochée; le circuit sera enregi
 $string['error1'] =  'Désoléé, une erreur est survenue dans votre navigateur en démarrant les outils schématiques. nous recommandons de prendre Firefox ou Chrome. ';
 $string['Ground_connection'] =  'Branchement mise à la Terre';
 $string['Node_label'] =  'Node label';
-$string[' Voltage_source'] =  'Source de tension ';
+$string['Voltage_source'] =  'Source de tension ';
 $string['Current_source'] =  'Source de courant';
 $string['Voltage_pile'] =  'Pile';
 $string['Voltage_Batterie'] =  'Batterie';
@@ -48,7 +48,7 @@ $string['Diode'] =  'Diode ';
 $string['NFet'] =  'NFet';
 $string['PFet'] =  'PFet';
 $string['NPN'] =  'NPN';
-$string[' PNP'] =  'PNP';
+$string['PNP'] =  'PNP';
 $string['mesure'] = 'Appareil de mesure '; //window.parent.M.str.atto_circuit.mesure
 $string['moteur'] = 'Moteur ';
 $string['fusible'] = 'Fusible ';
@@ -57,7 +57,7 @@ $string['amperemetre'] = 'Ampèremètre ';
 $string['Voltage_probe'] =  'Sonde de différence de potentiel';
 $string['Current_probe'] =  'Sonde de courant';
 $string['drag_onto_diagram'] =  'Glisser et déposer pour insérer';
-$string[ 'Help'] =  'Afficher la page d\'aide.';
+$string['Help'] =  'Afficher la page d\'aide.';
 $string['Grid']  = 'Afficher/ masquer la grille.';
 $string['Link_tip'] = 'share a link to the circuit';
 $string['Cut'] =  'Couper le composant sélectionné dans le presse-papier.';
@@ -119,7 +119,7 @@ $string['Transient_Analysis_add_a_probe'] =  'add a probe to the diagram!';
 
 //Use creative phrasing to get this sentence to come out right'] =  
 // alert('The ' + color + ' probe is connected to node ' + '"' + label + '"' + '; which is not an actual circuit node');
-$string['The probe_is_connected_to_node'] =  ' probe is connected to node ';
+$string['probe_is_connected_to_node'] =  ' probe is connected to node ';
 $string['which_is_not_an_actual_circuit_node'] =  '; which is not an actual circuit node.';
 
 $string['Voltage'] =  'Voltage';
@@ -129,7 +129,7 @@ $string['Node_has_two_conflicting_labels'] =  'Node has two conflicting labels:'
 
 $string['DC_value'] =  'DC value';
 
-$string[' impulse'] =  'impulse';
+$string['impulse'] =  'impulse';
 $string['Height'] =  'Height';
 $string['Width'] =  'Width (secs)';
 
@@ -187,11 +187,11 @@ $string['dc'] =  'dc';
 $string['red'] =  'rouge';
 $string['green'] =  'Vert';
 $string['blue'] =  'bleu';
-$string[' cyan'] =  'cyan';
+$string['cyan'] =  'cyan';
 $string['magenta'] =  'magenta';
 $string['yellow'] =  'jaune';
 $string['orange'] =  'orange';
-$string[' black'] =  'noir';
+$string['black'] =  'noir';
 $string['xaxis'] =  'axe des x ';
 
 $string['Ics'] =  'Ics';

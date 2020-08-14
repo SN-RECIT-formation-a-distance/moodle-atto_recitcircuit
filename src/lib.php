@@ -115,7 +115,6 @@ function atto_circuit_strings_for_js() {
                                           'Stop_time_seconds',
                                           'tstop_lbl',
                                           'Transient_Analysis_add_a_probe',
-                                          'The',
                                           'probe_is_connected_to_node',
                                           'which_is_not_an_actual_circuit_node',
                                           'Voltage',
