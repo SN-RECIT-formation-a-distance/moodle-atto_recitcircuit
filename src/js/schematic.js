@@ -197,7 +197,11 @@ var cktsim = (function() {
 			this.v(connections[0],connections[1],'0',name);
 		else if (type == 'vm')	// mesure
 			this.d(connections[0],connections[1],'0',name);
-			else if (type == 'mo')	// moteur
+		else if (type == 'am')	// ampoule
+			this.d(connections[0],connections[1],'0',name);
+		else if (type == 'mo')	// moteur
+			this.d(connections[0],connections[1],'0',name);	
+		else if (type == 'so')	// sonore
 			this.d(connections[0],connections[1],'0',name);	
 	}
 
@@ -795,6 +799,19 @@ var cktsim = (function() {
 	    	return this.add_device(vm, name);
 	    } // zero area diodes discarded.
 	};
+		/*ampoule */
+		Circuit.prototype.am = function(n1,n2,area,type,name) {
+			// try to convert string value into numeric value, barf if we can't
+			if ((typeof area) == 'string') {
+				area = parse_number(area,undefined);
+				if (area === undefined) return undefined;
+			}
+	
+			if (area != 0) {
+				let vm = new ampoule(n1,n2,am);
+				return this.add_device(am, name);
+			} // zero area diodes discarded.
+		};
 	/************* */
 
 /*fusible */
@@ -2610,7 +2627,9 @@ schematic = (function() {
 		'r': [Resistor, window.parent.M.str.atto_circuit.Resistor],
 		//'rv': [Resistorvariable, window.parent.M.str.atto_circuit.Resistorvariable],
 		'vm': [mesure, window.parent.M.str.atto_circuit.mesure],
+		'am': [ampoule, window.parent.M.str.atto_circuit.ampoule],
 		'vo': [moteur, window.parent.M.str.atto_circuit.moteur],
+		'so': [sonore, window.parent.M.str.atto_circuit.sonore],
     	'c': [Capacitor, window.parent.M.str.atto_circuit.Capacitor],
     	//'l': [Inductor, window.parent.M.str.atto_circuit.Inductor],
     	//'o': [OpAmp, window.parent.M.str.atto_circuit.Op_Amp],
@@ -6621,11 +6640,11 @@ schematic = (function() {
 		this.draw_line(c,0,12,0,24);
 		if (this.properties.type == 'voltmetre') {
 			// put a box around an ideal diode
-			this.draw_text(c,"V",0,-9,1,16, false);
+			this.draw_text(c,"V",0,0,4,14, false);
 		}
 
 			else{
-				this.draw_text(c,"A",0,-9,1,16, false);
+				this.draw_text(c,"A",0,0,4,14, false);
 			}
 	   
 	   
@@ -6652,6 +6671,53 @@ schematic = (function() {
 	};
 	mesure.prototype.clone = function(x,y) {
 		return new mesure(x,y,this.rotation,this.properties.name,this.properties.vm);
+	};
+
+	////////////////////////////////////////////////////////////////////////////////
+	//
+	//  Ampoule
+	//
+	////////////////////////////////////////////////////////////////////////////////
+	
+  
+		function ampoule(x,y,rotation,name,am) {
+		Component.call(this,'am',x,y,rotation);
+		this.properties.name = name;
+		//this.properties.r = r ? r : '1';
+		this.add_connection(0,-24);
+		this.add_connection(0,24);
+		this.bounding_box = [-7,-24,31,24];
+		this.update_coords();
+	}
+	ampoule.prototype = new Component();
+	ampoule.prototype.constructor = ampoule;
+
+	ampoule.prototype.toString = function() {
+		return '<ampoule '+this.properties.vm+' ('+this.x+','+this.y+')>';
+	};
+
+	ampoule.prototype.draw = function(c) {
+		Component.prototype.draw.call(this,c); 
+		
+		  // give superclass a shot
+		this.draw_line(c,0,-24,0,-5);
+		this.draw_line(c,0,-5,5,-5);
+		this.draw_circle(c,5,0,12,false);
+		this.draw_arc(c,5,-2,3,6*Math.PI/4,2*Math.PI/4);
+		this.draw_arc(c,5,2,3,6*Math.PI/4,2*Math.PI/4);
+		//his.draw_arc(c,7,0,2,4*Math.PI/6,-2*Math.PI/4);
+		this.draw_arc(c,7,0,2,3*Math.PI/4,-3*Math.PI/4);
+		this.draw_line(c,0,5,0,24);
+		this.draw_line(c,0,5,5,5);
+		
+	   
+	    if (this.properties.name)
+	    	this.draw_text(c,this.properties.name,30,0,5,property_size);
+	};
+	
+	
+	ampoule.prototype.clone = function(x,y) {
+		return new ampoule(x,y,this.rotation,this.properties.name,this.properties.vm);
 	};
 		////////////////////////////////////////////////////////////////////////////////
 	//
@@ -6685,7 +6751,7 @@ schematic = (function() {
 	    this.draw_circle(c,0,0,12,false);
 		this.draw_line(c,0,12,0,24);
 		
-				this.draw_text(c,"M",0,-9,1,16, false);
+				this.draw_text(c,"M",0,0,4,12, false);
 				   
 	   
 	    if (this.properties.name)
@@ -6694,6 +6760,49 @@ schematic = (function() {
 	
 	moteur.prototype.clone = function(x,y) {
 		return new moteur(x,y,this.rotation,this.properties.name,this.properties.vm);
+	};
+
+		////////////////////////////////////////////////////////////////////////////////
+	//
+	//  sonore
+	//
+	////////////////////////////////////////////////////////////////////////////////
+	
+  
+	function sonore(x,y,rotation,name,mo) {
+		Component.call(this,'so',x,y,rotation);
+		this.properties.name = name;
+		//this.properties.r = r ? r : '1';
+		this.add_connection(0,-24);
+		this.add_connection(0,24);
+		
+		this.bounding_box = [-12,-24,12,24];
+		this.update_coords();
+	}
+	sonore.prototype = new Component();
+	sonore.prototype.constructor = sonore;
+
+	sonore.prototype.toString = function() {
+		return '<sonore '+this.properties.so+' ('+this.x+','+this.y+')>';
+	};
+
+	sonore.prototype.draw = function(c) {
+		Component.prototype.draw.call(this,c); 
+		
+		  // give superclass a shot
+		this.draw_line(c,0,-24,0,-12);
+		this.draw_circle(c,0,0,12,false);
+		this.draw_circle(c,0,0,4,false);
+		this.draw_line(c,0,12,0,24);
+		
+				   
+	   
+	    if (this.properties.name)
+	    	this.draw_text(c,this.properties.name,30,0,5,property_size);
+	};
+	
+	sonore.prototype.clone = function(x,y) {
+		return new sonore(x,y,this.rotation,this.properties.name,this.properties.vm);
 	};
 		////////////////////////////////////////////////////////////////////////////////
 	//
@@ -7386,15 +7495,15 @@ schematic = (function() {
 	//  Pile
 	//
 	////////////////////////////////////////////////////////////////////////////////
-	var Pile_types = ['Voltage_pile','Voltage_Batterie'];
+	var Pile_types = ['Voltage_pile','Voltage_Batterie','Voltage_Alternatif','Voltage_Prise'];
 	function Pile(x,y,rotation,name,type,volt) {
 		Component.call(this,type,x,y,rotation);
 		this.properties.name = name;
 		this.properties.volt = volt ? volt : '10';
 		this.properties.type = type ? type : 'Voltage_pile';
-		this.add_connection(0,0);
-		this.add_connection(0,48);
-		this.bounding_box = [-12,0,12,48];
+		this.add_connection(0,24);
+		this.add_connection(0,-24);
+		this.bounding_box = [-12,-24,12,24];
 		this.update_coords();
 	    //this.content = document.createElement('div');  // used by edit_properties
 	}
@@ -7410,9 +7519,9 @@ schematic = (function() {
 		
 		if (this.properties.type == 'Voltage_pile') {
 			// put a box around an ideal diode
-			this.draw_line(c,0,0,0,22);
+			this.draw_line(c,0,-24,0,-2);
 			//this.draw_circle(c,0,24,12,false);
-			this.draw_line(c,0,26,0,48);
+			this.draw_line(c,0,2,0,24);
 	
 	
 	
@@ -7422,37 +7531,69 @@ schematic = (function() {
 			//this.draw_line(c,12,12,12,0);
 			
 			//this.draw_line(c,6,6,18,6);
-			this.draw_line(c,-8,22,8,22);
-			this.draw_line(c,-3,26,3,26);
+			this.draw_line(c,-8,-2,8,-2);
+			this.draw_line(c,-3,2,3,2);
 			//this.draw_line(c,8,40,16,40);
+			this.draw_text(c,"-",14,16,12,8);
+			this.draw_text(c,"+",14,-24,12,8);
 			
 		}
-
+		else if (this.properties.type == 'Voltage_Alternatif') {
+			// put a box around an ideal diode
+			this.draw_line(c,0,-24,0,-12);
+			this.draw_circle(c,0,0,12,false);
+			this.draw_arc(c,0,-4,4,6*Math.PI/4,2*Math.PI/4);
+			this.draw_arc(c,0,4,4,-6*Math.PI/4,-2*Math.PI/4);
+			this.draw_line(c,0,12,0,24);
+	
+	
+	
+			
+			
+			
+		}
+		else if (this.properties.type == 'Voltage_Prise') {
+			
+			// put a box around an ideal diode
+			this.draw_line(c,0,-24,0,-4);
+			this.draw_circle(c,0,0,12,false);
+			this.draw_line(c,0,4,0,24);
+	
+	
+	
+			
+					// voltage pile
+			// draw + and -
+			//this.draw_line(c,12,12,12,0);
+			
+			//this.draw_line(c,6,6,18,6);
+			this.draw_line(c,-3,-4,3,-4);
+			this.draw_line(c,-3,4,3,4);
+			//this.draw_line(c,8,40,16,40)
+			
+		}
 			else{
-				// give superclass a shot
-	    this.draw_line(c,0,0,0,22);
-	    //this.draw_circle(c,0,24,12,false);
-	    this.draw_line(c,0,26,0,48);
-
-	    		// voltage pile
-		// draw + and -
+				this.draw_line(c,0,-24,0,-5);
+			//this.draw_circle(c,0,24,12,false);
+			this.draw_line(c,0,5,0,24);
 		
-		this.draw_line(c,-8,25,8,25);
-		this.draw_line(c,-3,29,3,29);
-		this.draw_line(c,-8,18,8,18);
-		this.draw_line(c,-3,22,3,22);
+		this.draw_line(c,-8,1,8,1);
+		this.draw_line(c,-3,5,3,5);
+		this.draw_line(c,-8,-6,8,-6);
+		this.draw_line(c,-3,-2,3,-2);
+		this.draw_text(c,"-",14,16,12,8);
+			this.draw_text(c,"+",14,-24,12,8);
 		
 		
 			}
 	   
 				
-			this.draw_text(c,"-",14,40,12,8);
-			this.draw_text(c,"+",14,0,12,8);
+			
 
 		if (this.properties.name)
-			this.draw_text(c,this.properties.name,20,18,2,property_size);
+			this.draw_text(c,this.properties.name,20,-12,2,property_size);
 			if (this.properties.volt)
-			this.draw_text(c,this.properties.volt +'V',20,30,2,property_size);
+			this.draw_text(c,this.properties.volt +'V',20,12,2,property_size);
 	};
 	Pile.prototype.edit_properties = function(x,y) {
 		if (inside(this.bbox,x,y)) {

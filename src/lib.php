@@ -35,7 +35,7 @@ function atto_circuit_strings_for_js() {
     // In order to prevent extra strings to be imported, comment/uncomment the characters
     // which are enabled in the JavaScript part of this plugin.
     $PAGE->requires->strings_for_js(array('circuittitle',
-                                          'insert','mesure','error1',
+                                          'insert','mesure','error1', 'ampoule','Voltage_Alternatif','Voltage_Prise','sonore',
                                           'Ground_connection',
                                           'Node_label',
                                           'Voltage_source',

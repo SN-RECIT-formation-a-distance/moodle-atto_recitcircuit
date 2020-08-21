@@ -31,14 +31,18 @@ $string['storeinrepo'] = 'Enregistrer comme un fichier image';
 $string['storeinrepo_desc'] = 'Si cette case est cochée; le circuit sera enregisté comme une image standard à la place d\'une  image en ligne base64 .';
 
 
-$string['error1'] =  'Désoléé, une erreur est survenue dans votre navigateur en démarrant les outils schématiques. nous recommandons de prendre Firefox ou Chrome. ';
+$string['error1'] =  'Désolé, une erreur est survenue dans votre navigateur en démarrant les outils schématiques. nous recommandons de prendre Firefox ou Chrome. ';
 $string['Ground_connection'] =  'Branchement mise à la Terre';
 $string['Node_label'] =  'Node label';
 $string['Voltage_source'] =  'Source de tension ';
 $string['Current_source'] =  'Source de courant';
 $string['Voltage_pile'] =  'Pile';
 $string['Voltage_Batterie'] =  'Batterie';
+$string['Voltage_Alternatif'] =  'Alternatif';
+    $string['Voltage_Prise'] =  'Prise';
 $string['Resistor'] =  'Resistor ';
+$string['ampoule'] =  'ampoule';
+$string['sonore'] =  'Avertisseur sonore';
 $string['Resistorvariable'] =  'Resistor variable ';
 $string['Interrupteurbascule'] =  'Interrupteur à bascule ';
 $string['Capacitor'] =  'Condensateur ';

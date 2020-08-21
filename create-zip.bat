@@ -1,6 +1,6 @@
 echo off
-set zipName=atto_vvvebjs
-set pluginName=atto_vvvebjs
+set zipName=atto_circuit
+set pluginName=atto_circuit
 
 rem remove the current 
 del %zipName%
