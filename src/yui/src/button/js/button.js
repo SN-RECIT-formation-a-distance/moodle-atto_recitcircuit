@@ -79,17 +79,18 @@
     
                 // Set name of button icon to be loaded.
                 //var icon = 'iconone';
-    
-                // Add the panoptobutton icon/buttons.
-                this.addButton({
-                    icon: 'circuit',
-                    iconComponent: 'atto_circuit',
-                    buttonName: "Circtuit",
-                    callback: this._displayDialogue,
-                    //callbackArgs: icon,
-                    //tags: 'img',
-                    //tagMatchRequiresAll: false
-                });
+                if ($allowed = true ) {
+                    this.addButton({
+                        icon: 'circuit',
+                        iconComponent: 'atto_circuit',
+                        buttonName: "Circtuit",
+                        callback: this._displayDialogue,
+                        //buttonadded = true
+                        //callbackArgs: icon,
+                        //tags: 'img',
+                        //tagMatchRequiresAll: false
+                    });
+                }
             },
     
             /**

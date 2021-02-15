@@ -43,8 +43,8 @@ YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
         SUBMITID = 'submit',
         CSS = {
             INPUTSUBMIT: 'atto_circuit_submit',
-            HGT: 'height: 500px;',
-            WDT: 'width: 800px;'
+            HGT: 'height: 600px;',
+            WDT: 'width: 900px;'
         },
         TEMPLATE = '' +
                 '<iframe src="{{isource}}" id="{{iframeID}}" style="{{CSS.HGT}}{{CSS.WDT}}" scrolling="auto" frameborder="0">' +
@@ -79,18 +79,20 @@ YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
     
                 // Set name of button icon to be loaded.
                 //var icon = 'iconone';
-    
-                // Add the panoptobutton icon/buttons.
-                this.addButton({
-                    icon: 'circuit',
-                    iconComponent: 'atto_circuit',
-                    buttonName: "Circuit",
-                    callback: this._displayDialogue,
-                    //callbackArgs: icon,
-                    //tags: 'img',
-                    //tagMatchRequiresAll: false
-                });
+                if ($allowed = true ) {
+                    this.addButton({
+                        icon: 'circuit',
+                        iconComponent: 'atto_circuit',
+                        buttonName: "Circtuit",
+                        callback: this._displayDialogue,
+                        //buttonadded = true
+                        //callbackArgs: icon,
+                        //tags: 'img',
+                        //tagMatchRequiresAll: false
+                    });
+                }
             },
+    
     
             /**
              * Converts base64 to binary.
@@ -313,7 +315,7 @@ YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
              */
             _displayDialogue: function(e, clickedicon) {
                 var width = '950',
-                    height = '600',
+                    height = '700',
                     bodycontent,
                     dialogue;
     

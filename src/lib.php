@@ -59,6 +59,7 @@ function atto_circuit_strings_for_js() {
                                           'fusible',
                                           'voltmetre',
                                           'amperemetre',
+                                          'ohmmetre',
                                           'Voltage_probe',
                                           'Current_probe',
                                           'drag_onto_diagram',
@@ -161,8 +162,8 @@ function atto_circuit_strings_for_js() {
                                           'type',
                                           'normal',
                                           'DEL',
-                                          'ferme',
-                                          'ouvert',
+                                          'bferme',
+                                          'bouvert','poussoir', 'magnetique', 'bidir',
                                           'WL',
                                           'A',
                                           'Plot_color',
@@ -181,7 +182,16 @@ function atto_circuit_strings_for_js() {
                                           'Ies',
                                           'alphaF',
                                           'alphaR',
-                                          'last_line'
+                                          'last_line',
+                                          'strSHelp',
+                                          'strAddC', 
+'strAddW', 
+'strSel',  
+'strMove', 
+'strDel',  
+'strRot',
+'strProp', 
+'strNum' 
                                           ),
                                     'atto_circuit');
 }
@@ -191,7 +201,42 @@ function atto_circuit_strings_for_js() {
  * @param string $elementid
  */
 function atto_circuit_params_for_js($elementid, $options, $fpoptions) {
+   /* global $CFG, $SESSION, $USER, $COURSE, $SITE, $PAGE, $DB, $THEME ;
+    $context = $options['context'];
+    if (!$context) {
+        $context = context_system::instance();
+    }
+    
+    //$context = context_course::instance($COURSE->id);
+    $context = get_context_instance(CONTEXT_COURSE,$COURSE->id);
+    $roles = array();
+$roles = get_user_roles($context, $USER->id, false);
+$role = key($roles);
+$rolename = $roles[$role]->shortname;
+
+
+    
+    $sesskey = sesskey();
+    $allowedusers = get_config('atto_circuit', 'allowedusers');*/
+    
+
+    // Update $allowedtypes to account for capabilities.
+  /*  if ($allowedusers === 'teachersonly' && ((has_capability('moodle/legacy:editingteacher', $context, $USER->id, false) || (has_capability('moodle/legacy:teacher', $context, $USER->id, false)))))*/ 
+    /*if (($allowedusers === 'teachersonly') && ($rolename ==='coursecreator')){*/
+        $allowed = 1;
+    /*} 
+    else if ($allowedusers === 'allusers' ) {
+    $allowed = 1;
+    }
+    else {
+        $allowed = 0;
+    }*/
+
+   
+             
     // Pass the number of visible groups as a param.
-    $params = array('storeinrepo' => get_config('atto_circuit', 'storeinrepo'));
+    $params = array('storeinrepo' => get_config('atto_circuit', 'storeinrepo'),
+                    'allowed' => $allowed);
+
     return $params;
 }

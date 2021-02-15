@@ -20,13 +20,12 @@ YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
      * @copyright  2017 Matt Davidson <davidso1@rose-hulman.com>
      * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
      */
-    
+  
     /**
      * @module moodle-atto_circuit-button
      */
     
-    /**
-     * Atto text editor circuit plugin.
+     /* Atto text editor circuit plugin.
      *
      * @namespace M.atto_circuit
      * @class button
@@ -43,8 +42,8 @@ YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
         SUBMITID = 'submit',
         CSS = {
             INPUTSUBMIT: 'atto_circuit_submit',
-            HGT: 'height: 500px;',
-            WDT: 'width: 800px;'
+            HGT: 'height: 600px;',
+            WDT: 'width: 900px;'
         },
         TEMPLATE = '' +
                 '<iframe src="{{isource}}" id="{{iframeID}}" style="{{CSS.HGT}}{{CSS.WDT}}" scrolling="auto" frameborder="0">' +
@@ -73,23 +72,24 @@ YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
              */
             initializer: function() {
                 // Filepicker must be enabled to work.
-                if (!this.get('host').canShowFilepicker('media') && this.get(ATTRSTOREINREPO) > 0) {
+                if (!this.get('host').canShowFilepicker('media') && this.get(ATTRSTOREINREPO) > 0 ) {
                     return;
                 }
     
                 // Set name of button icon to be loaded.
                 //var icon = 'iconone';
-    
-                // Add the panoptobutton icon/buttons.
-                this.addButton({
-                    icon: 'circuit',
-                    iconComponent: 'atto_circuit',
-                    buttonName: "Circtuit",
-                    callback: this._displayDialogue,
-                    //callbackArgs: icon,
-                    //tags: 'img',
-                    //tagMatchRequiresAll: false
-                });
+                if (this.get('allowed') > 0 ) {
+                    this.addButton({
+                        icon: 'circuit',
+                        iconComponent: 'atto_circuit',
+                        buttonName: "Circuit",
+                        callback: this._displayDialogue,
+                        //buttonadded = true
+                        //callbackArgs: icon,
+                        //tags: 'img',
+                        //tagMatchRequiresAll: false
+                    });
+                }
             },
     
             /**
@@ -313,7 +313,7 @@ YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
              */
             _displayDialogue: function(e, clickedicon) {
                 var width = '950',
-                    height = '600',
+                    height = '700',
                     bodycontent,
                     dialogue;
     
@@ -481,7 +481,16 @@ YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
              */
             storeinrepo: {
                 value: 0
-            }
+            },
+            /** 
+         * The allowedtypes to use when generating this recordrtc.
+         *
+         *@type Number
+             * @default 0
+             */
+        allowed: {
+            value: 0
+        }
         }});
     
     }, '@VERSION@', {"requires": ["moodle-editor_atto-plugin"]});

@@ -204,16 +204,12 @@ $string['alphaF'] =  '\u03B1F';
 $string['alphaR'] =  '\u03B1R';
 $string['last_line'] =  'last line; no comma';
 
-/*  
-var strSHelp = "CIRCUIT SANDBOX HELP\n\n";		//embedded Help 
-var strAddC = "Add component: Tap on a part in the parts bin; then tap on the schematic.\n\n";
-var strAddW = "Add wire: Touch on a connection point (open circle). Drag. Release.\n\n";
-var strSel  = "Select: Drag a rectangle to select components. \n(desktop:) Shift-click to include another component.\n\n";
-var strMove = "Move: Touch and drag to a new location.\n\n";
-var strDel  = "Delete: Tap to select; then tap the X icon or hit BACKSPACE.\n\n";
-var strRot  = "Rotate/Reflect: Click to select; then click on the rotation icon or type the letter \"r\" to rotate 90. Repeat for more rotations and reflections (8 total).\n\n";
-var strProp = "Properties: Double tap on a component to change its properties.\n\n";
-var strNum  = "Numbers may be entered using engineering notation;\n\
-T = 10^12; G = 10^9; M = 10^6; k = 10^3\n\
-m = 10^-3; u = 10^-6; n = 10^-9; p = 10^-12; f = 10^-15";
-*/
+$string['strSHelp'] = " AIDE CIRCUIT \n\n";		//embedded Help 
+    $string['strAddC'] = "Ajouter un composant: Cliquer sur le composant dans la liste puis cliquer sur le schéma. \n\n";
+    $string['strAddW'] = "Ajouter un fil: Cliquer sur un poimt de connexion (cercle vide), glisser, relacher.\n\n";
+    $string['strSel']  = "Selectionner: Dessiner un rectangle pour selectionner des composants. \n Shift-click pour inclure d\'autres composants. i.\n\n";
+    $string['strMove'] = "Déplacer: Cliquer et déplacer.\n\n";
+    $string['strDel']  = "Supprimer: Tap to select; then tap the X icon or hit BACKSPACE.\n\n";
+    $string['strRot'] = "";//Rotate/Reflect: Click to select; then click on the rotation icon or type the letter \"r\" to rotate 90. Repeat for more rotations and reflections (8 total).\n\n";
+    $string['strProp'] = "Propertés: Double-cliquer sur un composant pour modifier ses propriétés.\n\n";
+    $string['strNum']  = "";//Numbers may be entered using engineering notation\n"

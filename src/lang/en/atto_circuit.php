@@ -29,6 +29,10 @@ $string['insert'] = 'Insert Circuit';
 $string['settings'] = 'Circuit settings';
 $string['storeinrepo'] = 'Store as image file';
 $string['storeinrepo_desc'] = 'If checked the circuit will be saved as a standard image upload instead of a base64 inline image.';
+$string['allusers'] = 'all users';
+$string['teachersonly'] = 'teachers only';
+$string['allowedusers'] = 'allowedusers etc';
+$string['allowedusers_desc'] = 'allowedusers decsetc.';
 
     $string['error1'] =  'Sorry; there was a browser error in starting the schematic tool. We recommend using the latest versions of Firefox and Chrome.';
     $string['Ground_connection'] =  'Ground connection';
@@ -57,6 +61,7 @@ $string['storeinrepo_desc'] = 'If checked the circuit will be saved as a standar
     $string['fusible'] = 'Fusible';
     $string['voltmetre'] = 'Voltmètre';
     $string['amperemetre'] = 'Ampèremètre';
+    $string['ohmmetre'] = 'Ohmmètre';
     $string['Voltage_probe'] =  'Voltage probe';
     $string['Current_probe'] =  'Current probe';
     $string['drag_onto_diagram'] =  'drag or tap to insert';
@@ -179,8 +184,11 @@ $string['storeinrepo_desc'] = 'If checked the circuit will be saved as a standar
     $string['type'] =  'Type';
     $string['normal'] =  'normal';
     $string['DEL'] =  'DEL';
-    $string['ferme'] =   "Fermé";
-    $string['ouvert'] =  "Ouvert";
+    $string['bferme'] =   "Bascule fermé";
+    $string['bouvert'] =  "Bascule ouvert";
+    $string['magnetique'] =   "Magnétique";
+    $string['bidir'] =  "Bidirectionnelle";
+    $string['poussoir'] =   "Poussoir";
     $string['WL'] =  'W/L';
     $string['A'] =  'A';
     $string['Plot_color'] =  'Plot color';
@@ -203,16 +211,16 @@ $string['storeinrepo_desc'] = 'If checked the circuit will be saved as a standar
     $string['alphaR'] =  '\u03B1R';
     $string['last_line'] =  'last line; no comma';
     
-  /*  
-    var strSHelp = "CIRCUIT SANDBOX HELP\n\n";		//embedded Help 
-    var strAddC = "Add component: Tap on a part in the parts bin; then tap on the schematic.\n\n";
-    var strAddW = "Add wire: Touch on a connection point (open circle). Drag. Release.\n\n";
-    var strSel  = "Select: Drag a rectangle to select components. \n(desktop:) Shift-click to include another component.\n\n";
-    var strMove = "Move: Touch and drag to a new location.\n\n";
-    var strDel  = "Delete: Tap to select; then tap the X icon or hit BACKSPACE.\n\n";
-    var strRot  = "Rotate/Reflect: Click to select; then click on the rotation icon or type the letter \"r\" to rotate 90. Repeat for more rotations and reflections (8 total).\n\n";
-    var strProp = "Properties: Double tap on a component to change its properties.\n\n";
-    var strNum  = "Numbers may be entered using engineering notation;\n\
-    T = 10^12; G = 10^9; M = 10^6; k = 10^3\n\
+    $string['strSHelp'] = "CIRCUIT SANDBOX HELP\n\n";		//embedded Help 
+    $string['strAddC'] = "Add component: Tap on a part in the parts bin; then tap on the schematic.\n\n";
+    $string['strAddW'] = "Add wire: Touch on a connection point (open circle). Drag. Release.\n\n";
+    $string['strSel']  = "Select: Drag a rectangle to select components. \n(desktop:) Shift-click to include another component.\n\n";
+    $string['strMove'] = "Move: Touch and drag to a new location.\n\n";
+    $string['strDel']  = "Delete: Tap to select; then tap the X icon or hit BACKSPACE.\n\n";
+    $string['strRot'] = "Rotate/Reflect: Click to select; then click on the rotation icon or type the letter \"r\" to rotate 90. Repeat for more rotations and reflections (8 total).\n\n";
+    $string['strProp'] = "Properties: Double tap on a component to change its properties.\n\n";
+    $string['strNum']  = "Numbers may be entered using engineering notation\n";
+    /*  
+   T = 10^12; G = 10^9; M = 10^6; k = 10^3\n\
     m = 10^-3; u = 10^-6; n = 10^-9; p = 10^-12; f = 10^-15";
     */

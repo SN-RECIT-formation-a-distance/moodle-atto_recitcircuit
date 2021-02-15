@@ -37,4 +37,15 @@ if ($ADMIN->fulltree) {
                                                 $desc,
                                                 0);
     $settings->add($setting);
+    
+    $options = array(
+        'allusers' => new lang_string('allusers', 'atto_circuit'),
+        'teachersonly' => new lang_string('teachersonly', 'atto_circuit'),
+            );
+    $name = get_string('allowedusers', 'atto_circuit');
+    $desc = get_string('allowedusers_desc', 'atto_circuit');
+    $default = 'teachersonly';
+    $setting = new admin_setting_configselect('atto_circuit/allowedusers', $name, $desc, $default, $options);
+    $settings->add($setting);
+
 }
