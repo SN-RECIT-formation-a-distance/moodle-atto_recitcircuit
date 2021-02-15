@@ -18,7 +18,9 @@
  * Strings for component 'atto_circuit'; language 'en'.
  *
  * @package    atto_circuit
- * @copyright  2013 Damyon Wiese  <damyon@moodle.com>
+ * @copyright (C) 2011 Massachusetts Institute of Technology
+ * @copyright (C) 2015-2019 Modifications by Khan Academy and Willy McAllister, Spinning Numbers.
+ * @copyright (C) 2021 Adapations for Moodle, RECITFAD https://recitfad.ca .
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

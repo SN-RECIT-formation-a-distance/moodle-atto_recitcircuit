@@ -6,6 +6,7 @@
 
 // Copyright (C) 2011 Massachusetts Institute of Technology
 // Copyright (C) 2015-2019 Modifications by Khan Academy and Willy McAllister, Spinning Numbers.
+// Copyright (C) 2021 Adapations for Moodle, RECITFAD.
 
 // create a circuit for simulation using "new cktsim.Circuit()"
 
