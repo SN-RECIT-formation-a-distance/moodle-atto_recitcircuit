@@ -26,8 +26,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2020062907;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->release   = '0.2.1';
+$plugin->version   = 2021021000;        // The current plugin version (Date: YYYYMMDDXX).
+$plugin->release   = 'R12-V1.12.0';
 $plugin->requires  = 2018050800;        // Requires this Moodle version.
 $plugin->component = 'atto_circuit';
 $plugin->maturity = MATURITY_ALPHA;
