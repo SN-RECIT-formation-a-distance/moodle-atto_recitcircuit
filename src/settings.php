@@ -46,7 +46,7 @@ if ($ADMIN->fulltree) {
             );
     $name = get_string('allowedusers', 'atto_circuit');
     $desc = get_string('allowedusers_desc', 'atto_circuit');
-    $default = 'teachersonly';
+    $default = 'allusers';
     $setting = new admin_setting_configselect('atto_circuit/allowedusers', $name, $desc, $default, $options);
     $settings->add($setting);
 
