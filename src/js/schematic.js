@@ -6771,10 +6771,10 @@ schematic = (function() {
   
 	function speaker(x,y,rotation,name,am) {
 		Component.call(this,'sp',x,y,rotation);
-		this.properties.name = name ? name :'L1';
+		this.properties.name = name ? name :'HP';
 		this.add_connection(0,-24);
 		this.add_connection(0,24);
-		this.bounding_box = [-7,-24,31,24];
+		this.bounding_box = [-12,-24,12,24];
 		this.update_coords();
 	}
 	speaker.prototype = new Component();
@@ -6788,14 +6788,18 @@ schematic = (function() {
 		Component.prototype.draw.call(this,c); 
 		
 		  
-		this.draw_line(c,0,-24,0,-5);
-		this.draw_line(c,0,-5,5,-5);
-		this.draw_circle(c,5,0,12,false);
-		this.draw_arc(c,5,-2,3,6*Math.PI/4,2*Math.PI/4);
-		this.draw_arc(c,5,2,3,6*Math.PI/4,2*Math.PI/4);
-		this.draw_arc(c,7,0,2,3*Math.PI/4,-3*Math.PI/4);
-		this.draw_line(c,0,5,0,24);
-		this.draw_line(c,0,5,5,5);
+		this.draw_line(c,0,12,0,24); // fil haut
+        this.draw_line(c,0,-12,0,-24); // fil bas
+        this.draw_circle(c,0,0,12,false); // cercle principal
+	    this.draw_line(c,-8,4,0,4); //carré-haut
+        this.draw_line(c,-8,-4,0,-4); //carré-bas
+        this.draw_line(c,-8,-4,-8,4); //carré-gauche
+        this.draw_line(c,0,-4,0,4); //carré-gauche
+        this.draw_line(c,0,4,6,8); //angle-haut
+        this.draw_line(c,0,-4,6,-8); //angle-bas
+        this.draw_line(c,6,8,6,-8); //vertical
+		this.draw_text(c,"-",7,14,1,8);
+		this.draw_text(c,"+",7,-22,1,8);
 		
 	   
 	    if (this.properties.name)
@@ -6818,10 +6822,10 @@ schematic = (function() {
   
 	function heatingelement(x,y,rotation,name,am) {
 		Component.call(this,'he',x,y,rotation);
-		this.properties.name = name ? name :'L1';
+		this.properties.name = name ? name :'E1';
 		this.add_connection(0,-24);
 		this.add_connection(0,24);
-		this.bounding_box = [-7,-24,31,24];
+		this.bounding_box = [-12,-24,12,24];
 		this.update_coords();
 	}
 	heatingelement.prototype = new Component();
@@ -6835,15 +6839,23 @@ schematic = (function() {
 		Component.prototype.draw.call(this,c); 
 		
 		  
-		this.draw_line(c,0,-24,0,-5);
-		this.draw_line(c,0,-5,5,-5);
-		this.draw_circle(c,5,0,12,false);
-		this.draw_arc(c,5,-2,3,6*Math.PI/4,2*Math.PI/4);
-		this.draw_arc(c,5,2,3,6*Math.PI/4,2*Math.PI/4);
-		this.draw_arc(c,7,0,2,3*Math.PI/4,-3*Math.PI/4);
-		this.draw_line(c,0,5,0,24);
-		this.draw_line(c,0,5,5,5);
-		
+		this.draw_line(c,0,-24,0,-14); //vertical
+        this.draw_line(c,0,-14,4,-14); //horizontal
+        this.draw_line(c,4,-14,4,-10); //vertical
+        this.draw_line(c,4,-10,0,-10); //horizontal
+        this.draw_line(c,0,-10,0,-6); //vertical
+        this.draw_line(c,0,-6,4,-6); //horizontal
+        this.draw_line(c,4,-6,4,-2); //vertical
+        this.draw_line(c,4,-2,0,-2); //horizontal
+		this.draw_line(c,0,-2,0,2); //vertical
+        this.draw_line(c,0,2,4,2); //horizontal
+        this.draw_line(c,4,2,4,6); //vertical
+        this.draw_line(c,4,6,0,6); //horizontal
+        this.draw_line(c,0,6,0,10); //vertical
+        this.draw_line(c,0,10,4,10); //horizontal
+        this.draw_line(c,4,10,4,14); //vertical
+        this.draw_line(c,4,14,0,14); //horizontal
+        this.draw_line(c,0,14,0,24); //vertical
 	   
 	    if (this.properties.name)
 	    	this.draw_text(c,this.properties.name,16,18,6,property_size);
