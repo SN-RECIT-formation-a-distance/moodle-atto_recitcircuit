@@ -204,6 +204,8 @@ var cktsim = (function() {
 			this.d(connections[0],connections[1],'0',name);	
 		else if (type == 'so')	// sonore
 			this.d(connections[0],connections[1],'0',name);	
+		else
+			this.d(connections[0],connections[1],'0',name);	
 	}
 
 	    if (!found_ground) { // No ground on schematic
@@ -800,19 +802,32 @@ var cktsim = (function() {
 	    	return this.add_device(vm, name);
 	    } // zero area diodes discarded.
 	};
-		/*ampoule */
-		Circuit.prototype.am = function(n1,n2,area,type,name) {
-			// try to convert string value into numeric value, barf if we can't
-			if ((typeof area) == 'string') {
-				area = parse_number(area,undefined);
-				if (area === undefined) return undefined;
-			}
-	
-			if (area != 0) {
-				let vm = new ampoule(n1,n2,am);
-				return this.add_device(am, name);
-			} // zero area diodes discarded.
-		};
+	/*ampoule */
+	Circuit.prototype.am = function(n1,n2,area,type,name) {
+		// try to convert string value into numeric value, barf if we can't
+		if ((typeof area) == 'string') {
+			area = parse_number(area,undefined);
+			if (area === undefined) return undefined;
+		}
+
+		if (area != 0) {
+			let vm = new ampoule(n1,n2,am);
+			return this.add_device(vm, name);
+		} // zero area diodes discarded.
+	};
+	/*speaker */
+	Circuit.prototype.sp = function(n1,n2,area,type,name) {
+		// try to convert string value into numeric value, barf if we can't
+		if ((typeof area) == 'string') {
+			area = parse_number(area,undefined);
+			if (area === undefined) return undefined;
+		}
+
+		if (area != 0) {
+			let vm = new speaker(n1,n2,am);
+			return this.add_device(vm, name);
+		} // zero area diodes discarded.
+	};
 	/************* */
 
 /*fusible */
@@ -2631,8 +2646,14 @@ schematic = (function() {
 		'am': [ampoule, window.parent.M.str.atto_circuit.ampoule],
 		'vo': [moteur, window.parent.M.str.atto_circuit.moteur],
 		'so': [sonore, window.parent.M.str.atto_circuit.sonore],
-    	//'c': [Capacitor, window.parent.M.str.atto_circuit.Capacitor],
-    	//'l': [Inductor, window.parent.M.str.atto_circuit.Inductor],
+		'sp': [speaker, window.parent.M.str.atto_circuit.speaker],
+		'he': [heatingelement, window.parent.M.str.atto_circuit.heatingelement],
+		're': [relay, window.parent.M.str.atto_circuit.relay],
+		'cp': [cellpic, window.parent.M.str.atto_circuit.cellpic],
+		'bs': [buttonswitch, window.parent.M.str.atto_circuit.buttonswitch],
+		'ms': [magneticswitch, window.parent.M.str.atto_circuit.magneticswitch],
+    	'c': [Capacitor, window.parent.M.str.atto_circuit.Capacitor],
+    	'l': [Inductor, window.parent.M.str.atto_circuit.Inductor],
     	//'o': [OpAmp, window.parent.M.str.atto_circuit.Op_Amp],
     	'd': [Diode, window.parent.M.str.atto_circuit.Diode],
     	//'p': [PFet, window.parent.M.str.atto_circuit.PFet],
@@ -2641,7 +2662,7 @@ schematic = (function() {
 	    //'npn': [NPN, window.parent.M.str.atto_circuit.NPN],
     	/*'s': [Probe, window.parent.M.str.atto_circuit.Voltage_probe],*/
     	/*'a': [Ammeter, window.parent.M.str.atto_circuit.Current_probe]*/
-    };
+    }; 
 
 	// global clipboard
 	var sch_clipboard
@@ -6703,7 +6724,7 @@ schematic = (function() {
 	////////////////////////////////////////////////////////////////////////////////
 	
   
-		function ampoule(x,y,rotation,name,am) {
+	function ampoule(x,y,rotation,name,am) {
 		Component.call(this,'am',x,y,rotation);
 		this.properties.name = name ? name :'L1';
 		this.add_connection(0,-24);
@@ -6740,7 +6761,289 @@ schematic = (function() {
 	ampoule.prototype.clone = function(x,y) {
 		return new ampoule(x,y,this.rotation,this.properties.name,this.properties.vm);
 	};
-		////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////////
+	//
+	//  Speaker
+	//
+	////////////////////////////////////////////////////////////////////////////////
+	
+  
+	function speaker(x,y,rotation,name,am) {
+		Component.call(this,'sp',x,y,rotation);
+		this.properties.name = name ? name :'L1';
+		this.add_connection(0,-24);
+		this.add_connection(0,24);
+		this.bounding_box = [-7,-24,31,24];
+		this.update_coords();
+	}
+	speaker.prototype = new Component();
+	speaker.prototype.constructor = speaker;
+
+	speaker.prototype.toString = function() {
+		return '<speaker '+this.properties.vm+' ('+this.x+','+this.y+')>';
+	};
+
+	speaker.prototype.draw = function(c) {
+		Component.prototype.draw.call(this,c); 
+		
+		  
+		this.draw_line(c,0,-24,0,-5);
+		this.draw_line(c,0,-5,5,-5);
+		this.draw_circle(c,5,0,12,false);
+		this.draw_arc(c,5,-2,3,6*Math.PI/4,2*Math.PI/4);
+		this.draw_arc(c,5,2,3,6*Math.PI/4,2*Math.PI/4);
+		this.draw_arc(c,7,0,2,3*Math.PI/4,-3*Math.PI/4);
+		this.draw_line(c,0,5,0,24);
+		this.draw_line(c,0,5,5,5);
+		
+	   
+	    if (this.properties.name)
+	    	this.draw_text(c,this.properties.name,16,18,6,property_size);
+	};
+	
+	
+	speaker.prototype.clone = function(x,y) {
+		return new speaker(x,y,this.rotation,this.properties.name,this.properties.vm);
+	};
+
+	
+
+	////////////////////////////////////////////////////////////////////////////////
+	//
+	//  heatingelement
+	//
+	////////////////////////////////////////////////////////////////////////////////
+	
+  
+	function heatingelement(x,y,rotation,name,am) {
+		Component.call(this,'he',x,y,rotation);
+		this.properties.name = name ? name :'L1';
+		this.add_connection(0,-24);
+		this.add_connection(0,24);
+		this.bounding_box = [-7,-24,31,24];
+		this.update_coords();
+	}
+	heatingelement.prototype = new Component();
+	heatingelement.prototype.constructor = heatingelement;
+
+	heatingelement.prototype.toString = function() {
+		return '<heatingelement '+this.properties.vm+' ('+this.x+','+this.y+')>';
+	};
+
+	heatingelement.prototype.draw = function(c) {
+		Component.prototype.draw.call(this,c); 
+		
+		  
+		this.draw_line(c,0,-24,0,-5);
+		this.draw_line(c,0,-5,5,-5);
+		this.draw_circle(c,5,0,12,false);
+		this.draw_arc(c,5,-2,3,6*Math.PI/4,2*Math.PI/4);
+		this.draw_arc(c,5,2,3,6*Math.PI/4,2*Math.PI/4);
+		this.draw_arc(c,7,0,2,3*Math.PI/4,-3*Math.PI/4);
+		this.draw_line(c,0,5,0,24);
+		this.draw_line(c,0,5,5,5);
+		
+	   
+	    if (this.properties.name)
+	    	this.draw_text(c,this.properties.name,16,18,6,property_size);
+	};
+	
+	
+	heatingelement.prototype.clone = function(x,y) {
+		return new heatingelement(x,y,this.rotation,this.properties.name,this.properties.vm);
+	};
+
+	
+
+	////////////////////////////////////////////////////////////////////////////////
+	//
+	//  relay
+	//
+	////////////////////////////////////////////////////////////////////////////////
+	
+  
+	function relay(x,y,rotation,name,am) {
+		Component.call(this,'re',x,y,rotation);
+		this.properties.name = name ? name :'L1';
+		this.add_connection(0,-24);
+		this.add_connection(0,24);
+		this.bounding_box = [-7,-24,31,24];
+		this.update_coords();
+	}
+	relay.prototype = new Component();
+	relay.prototype.constructor = relay;
+
+	relay.prototype.toString = function() {
+		return '<relay '+this.properties.vm+' ('+this.x+','+this.y+')>';
+	};
+
+	relay.prototype.draw = function(c) {
+		Component.prototype.draw.call(this,c); 
+		
+		  
+		this.draw_line(c,0,-24,0,-5);
+		this.draw_line(c,0,-5,5,-5);
+		this.draw_circle(c,5,0,12,false);
+		this.draw_arc(c,5,-2,3,6*Math.PI/4,2*Math.PI/4);
+		this.draw_arc(c,5,2,3,6*Math.PI/4,2*Math.PI/4);
+		this.draw_arc(c,7,0,2,3*Math.PI/4,-3*Math.PI/4);
+		this.draw_line(c,0,5,0,24);
+		this.draw_line(c,0,5,5,5);
+		
+	   
+	    if (this.properties.name)
+	    	this.draw_text(c,this.properties.name,16,18,6,property_size);
+	};
+	
+	
+	relay.prototype.clone = function(x,y) {
+		return new relay(x,y,this.rotation,this.properties.name,this.properties.vm);
+	};
+
+	
+
+	////////////////////////////////////////////////////////////////////////////////
+	//
+	//  cellpic
+	//
+	////////////////////////////////////////////////////////////////////////////////
+	
+  
+	function cellpic(x,y,rotation,name,am) {
+		Component.call(this,'cp',x,y,rotation);
+		this.properties.name = name ? name :'L1';
+		this.add_connection(0,-24);
+		this.add_connection(0,24);
+		this.bounding_box = [-7,-24,31,24];
+		this.update_coords();
+	}
+	cellpic.prototype = new Component();
+	cellpic.prototype.constructor = cellpic;
+
+	cellpic.prototype.toString = function() {
+		return '<cellpic '+this.properties.vm+' ('+this.x+','+this.y+')>';
+	};
+
+	cellpic.prototype.draw = function(c) {
+		Component.prototype.draw.call(this,c); 
+		
+		  
+		this.draw_line(c,0,-24,0,-5);
+		this.draw_line(c,0,-5,5,-5);
+		this.draw_circle(c,5,0,12,false);
+		this.draw_arc(c,5,-2,3,6*Math.PI/4,2*Math.PI/4);
+		this.draw_arc(c,5,2,3,6*Math.PI/4,2*Math.PI/4);
+		this.draw_arc(c,7,0,2,3*Math.PI/4,-3*Math.PI/4);
+		this.draw_line(c,0,5,0,24);
+		this.draw_line(c,0,5,5,5);
+		
+	   
+	    if (this.properties.name)
+	    	this.draw_text(c,this.properties.name,16,18,6,property_size);
+	};
+	
+	
+	cellpic.prototype.clone = function(x,y) {
+		return new cellpic(x,y,this.rotation,this.properties.name,this.properties.vm);
+	};
+
+	
+
+	////////////////////////////////////////////////////////////////////////////////
+	//
+	//  buttonswitch
+	//
+	////////////////////////////////////////////////////////////////////////////////
+	
+  
+	function buttonswitch(x,y,rotation,name,am) {
+		Component.call(this,'bs',x,y,rotation);
+		this.properties.name = name ? name :'L1';
+		this.add_connection(0,-24);
+		this.add_connection(0,24);
+		this.bounding_box = [-7,-24,31,24];
+		this.update_coords();
+	}
+	buttonswitch.prototype = new Component();
+	buttonswitch.prototype.constructor = buttonswitch;
+
+	buttonswitch.prototype.toString = function() {
+		return '<buttonswitch '+this.properties.vm+' ('+this.x+','+this.y+')>';
+	};
+
+	buttonswitch.prototype.draw = function(c) {
+		Component.prototype.draw.call(this,c); 
+		
+		  
+		this.draw_line(c,0,-24,0,-5);
+		this.draw_line(c,0,-5,5,-5);
+		this.draw_circle(c,5,0,12,false);
+		this.draw_arc(c,5,-2,3,6*Math.PI/4,2*Math.PI/4);
+		this.draw_arc(c,5,2,3,6*Math.PI/4,2*Math.PI/4);
+		this.draw_arc(c,7,0,2,3*Math.PI/4,-3*Math.PI/4);
+		this.draw_line(c,0,5,0,24);
+		this.draw_line(c,0,5,5,5);
+		
+	   
+	    if (this.properties.name)
+	    	this.draw_text(c,this.properties.name,16,18,6,property_size);
+	};
+	
+	
+	buttonswitch.prototype.clone = function(x,y) {
+		return new buttonswitch(x,y,this.rotation,this.properties.name,this.properties.vm);
+	};
+
+	
+
+	////////////////////////////////////////////////////////////////////////////////
+	//
+	//  magneticswitch
+	//
+	////////////////////////////////////////////////////////////////////////////////
+	
+  
+	function magneticswitch(x,y,rotation,name,am) {
+		Component.call(this,'ms',x,y,rotation);
+		this.properties.name = name ? name :'L1';
+		this.add_connection(0,-24);
+		this.add_connection(0,24);
+		this.bounding_box = [-7,-24,31,24];
+		this.update_coords();
+	}
+	magneticswitch.prototype = new Component();
+	magneticswitch.prototype.constructor = magneticswitch;
+
+	magneticswitch.prototype.toString = function() {
+		return '<magneticswitch '+this.properties.vm+' ('+this.x+','+this.y+')>';
+	};
+
+	magneticswitch.prototype.draw = function(c) {
+		Component.prototype.draw.call(this,c); 
+		
+		  
+		this.draw_line(c,0,-24,0,-5);
+		this.draw_line(c,0,-5,5,-5);
+		this.draw_circle(c,5,0,12,false);
+		this.draw_arc(c,5,-2,3,6*Math.PI/4,2*Math.PI/4);
+		this.draw_arc(c,5,2,3,6*Math.PI/4,2*Math.PI/4);
+		this.draw_arc(c,7,0,2,3*Math.PI/4,-3*Math.PI/4);
+		this.draw_line(c,0,5,0,24);
+		this.draw_line(c,0,5,5,5);
+		
+	   
+	    if (this.properties.name)
+	    	this.draw_text(c,this.properties.name,16,18,6,property_size);
+	};
+	
+	
+	magneticswitch.prototype.clone = function(x,y) {
+		return new magneticswitch(x,y,this.rotation,this.properties.name,this.properties.vm);
+	};
+
+
+	////////////////////////////////////////////////////////////////////////////////
 	//
 	//  moteur
 	//

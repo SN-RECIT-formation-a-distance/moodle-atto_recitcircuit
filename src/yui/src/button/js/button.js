@@ -47,14 +47,14 @@
         SUBMITID = 'submit',
         CSS = {
             INPUTSUBMIT: 'atto_circuit_submit',
-            HGT: 'height: 500px;',
-            WDT: 'width: 800px;'
+            HGT: 'height: 600px;',
+            WDT: 'width: 975px;'
         },
         TEMPLATE = '' +
                 '<iframe src="{{isource}}" id="{{iframeID}}" style="{{CSS.HGT}}{{CSS.WDT}}" scrolling="auto" frameborder="0">' +
                 '</iframe>' +
                 '<div style="text-align:center">' +
-                    '<button class="mdl-align {{CSS.INPUTSUBMIT}}" id="{{submitid}}" style="{{selectalign}}">' +
+                    '<button class="mdl-align btn btn-primary {{CSS.INPUTSUBMIT}}" id="{{submitid}}" style="{{selectalign}}">' +
                         '{{get_string "insert" component}}' +
                     '</button>' +
                 '</div>',
@@ -83,7 +83,7 @@
     
                 // Set name of button icon to be loaded.
                 //var icon = 'iconone';
-                if ($allowed = true ) {
+                //if ($allowed == true) {
                     this.addButton({
                         icon: 'circuit',
                         iconComponent: 'atto_circuit',
@@ -94,7 +94,7 @@
                         //tags: 'img',
                         //tagMatchRequiresAll: false
                     });
-                }
+                //}
             },
     
             /**
@@ -317,8 +317,8 @@
              * @private
              */
             _displayDialogue: function(e, clickedicon) {
-                var width = '950',
-                    height = '600',
+                var width = 'auto',
+                    height = 'auto',
                     bodycontent,
                     dialogue;
     
@@ -341,16 +341,7 @@
                         }, 5);
                     }
                 });
-    
-                // Dialog doesn't detect changes in width without this.
-                // If you reuse the dialog, this seems necessary.
-                if (dialogue.width !== width + 'px') {
-                    dialogue.set('width', width + 'px');
-                }
-    
-                if (dialogue.height !== height + 'px') {
-                    dialogue.set('height', height + 'px');
-                }
+
                 // Append buttons to iframe.
                 bodycontent = this._getFormContent(clickedicon);
     

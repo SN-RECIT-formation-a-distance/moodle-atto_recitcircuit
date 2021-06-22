@@ -1,6 +1,8 @@
 YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
 
-   // This file is part of Moodle - http://moodle.org/
+
+
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -48,13 +50,13 @@ YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
         CSS = {
             INPUTSUBMIT: 'atto_circuit_submit',
             HGT: 'height: 600px;',
-            WDT: 'width: 900px;'
+            WDT: 'width: 975px;'
         },
         TEMPLATE = '' +
                 '<iframe src="{{isource}}" id="{{iframeID}}" style="{{CSS.HGT}}{{CSS.WDT}}" scrolling="auto" frameborder="0">' +
                 '</iframe>' +
                 '<div style="text-align:center">' +
-                    '<button class="mdl-align {{CSS.INPUTSUBMIT}}" id="{{submitid}}" style="{{selectalign}}">' +
+                    '<button class="mdl-align btn btn-primary {{CSS.INPUTSUBMIT}}" id="{{submitid}}" style="{{selectalign}}">' +
                         '{{get_string "insert" component}}' +
                     '</button>' +
                 '</div>',
@@ -83,7 +85,7 @@ YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
     
                 // Set name of button icon to be loaded.
                 //var icon = 'iconone';
-                if ($allowed = true ) {
+                //if ($allowed == true) {
                     this.addButton({
                         icon: 'circuit',
                         iconComponent: 'atto_circuit',
@@ -94,9 +96,8 @@ YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
                         //tags: 'img',
                         //tagMatchRequiresAll: false
                     });
-                }
+                //}
             },
-    
     
             /**
              * Converts base64 to binary.
@@ -318,8 +319,8 @@ YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
              * @private
              */
             _displayDialogue: function(e, clickedicon) {
-                var width = '950',
-                    height = '700',
+                var width = 'auto',
+                    height = 'auto',
                     bodycontent,
                     dialogue;
     
@@ -342,16 +343,7 @@ YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
                         }, 5);
                     }
                 });
-    
-                // Dialog doesn't detect changes in width without this.
-                // If you reuse the dialog, this seems necessary.
-                if (dialogue.width !== width + 'px') {
-                    dialogue.set('width', width + 'px');
-                }
-    
-                if (dialogue.height !== height + 'px') {
-                    dialogue.set('height', height + 'px');
-                }
+
                 // Append buttons to iframe.
                 bodycontent = this._getFormContent(clickedicon);
     
@@ -490,5 +482,7 @@ YUI.add('moodle-atto_circuit-button', function (Y, NAME) {
             }
         }});
     
-    }, '@VERSION@', {"requires": ["moodle-editor_atto-plugin"]});
     
+    
+
+}, '@VERSION@', {"requires": ["moodle-editor_atto-plugin"]});
