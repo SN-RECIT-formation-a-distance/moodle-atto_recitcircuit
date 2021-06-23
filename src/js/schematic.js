@@ -6878,10 +6878,10 @@ schematic = (function() {
 	function relay(x,y,rotation,name,am) {
 		Component.call(this,'re',x,y,rotation);
 		this.properties.name = name ? name :'K1';
-		this.add_connection(-22,-24);
-		this.add_connection(-22,24);
-        this.add_connection(12,-24);
-		this.add_connection(12,24);
+		this.add_connection(-16,-24);
+		this.add_connection(-16,24);
+        this.add_connection(16,-24);
+		this.add_connection(16,24);
 		this.bounding_box = [-24,-24,24,24];
 		this.update_coords();
 	}
@@ -6896,21 +6896,28 @@ schematic = (function() {
 		Component.prototype.draw.call(this,c); 
 		
         //contact
-        this.draw_line(c,12,-22,12,-12);
-        this.draw_circle(c,  12,-10,2,false );
-        this.draw_line(c,12,8,20,-12); //contact
-		this.draw_circle(c,  12,10,2,false );
-        this.draw_line(c,12,22,12,12);
+        this.draw_line(c,16,-24,16,-12);
+        this.draw_circle(c,  16,-10,2,false );
+        this.draw_line(c,16,8,22,-12); //contact
+		this.draw_circle(c,  16,10,2,false );
+        this.draw_line(c,16,24,16,12);
         //bobine
-        this.draw_line(c,-22,-22,-22,-16);
-        this.draw_arc(c,-22,-12,4,6*Math.PI/4,2*Math.PI/4);
-        this.draw_arc(c,-22,-4,4,6*Math.PI/4,2*Math.PI/4);
-        this.draw_arc(c,-22,4,4,6*Math.PI/4,2*Math.PI/4);
-        this.draw_arc(c,-22,12,4,6*Math.PI/4,2*Math.PI/4);
-        this.draw_line(c,-22,22,-22,16)
+        this.draw_line(c,-16,-24,-16,-16);
+        this.draw_arc(c,-16,-12,4,6*Math.PI/4,2*Math.PI/4);
+        this.draw_arc(c,-16,-4,4,6*Math.PI/4,2*Math.PI/4);
+        this.draw_arc(c,-16,4,4,6*Math.PI/4,2*Math.PI/4);
+        this.draw_arc(c,-16,12,4,6*Math.PI/4,2*Math.PI/4);
+        this.draw_line(c,-16,24,-16,16)
+        //pointillé
+        this.draw_line(c,-10,0,-8,0)
+        this.draw_line(c,-6,0,-4,0)
+        this.draw_line(c,-2,0,0,0)
+        this.draw_line(c,2,0,4,0)
+        this.draw_line(c,6,0,8,0)
+        this.draw_line(c,10,0,12,0)
 		  	   
 	    if (this.properties.name)
-	    	this.draw_text(c,this.properties.name,16,18,6,property_size);
+	    	this.draw_text(c,this.properties.name,20,20,6,property_size);
 	};
 	
 	
