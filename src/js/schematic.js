@@ -6877,10 +6877,12 @@ schematic = (function() {
   
 	function relay(x,y,rotation,name,am) {
 		Component.call(this,'re',x,y,rotation);
-		this.properties.name = name ? name :'L1';
-		this.add_connection(0,-24);
-		this.add_connection(0,24);
-		this.bounding_box = [-7,-24,31,24];
+		this.properties.name = name ? name :'K1';
+		this.add_connection(-22,-24);
+		this.add_connection(-22,24);
+        this.add_connection(12,-24);
+		this.add_connection(12,24);
+		this.bounding_box = [-24,-24,24,24];
 		this.update_coords();
 	}
 	relay.prototype = new Component();
@@ -6893,17 +6895,20 @@ schematic = (function() {
 	relay.prototype.draw = function(c) {
 		Component.prototype.draw.call(this,c); 
 		
-		  
-		this.draw_line(c,0,-24,0,-5);
-		this.draw_line(c,0,-5,5,-5);
-		this.draw_circle(c,5,0,12,false);
-		this.draw_arc(c,5,-2,3,6*Math.PI/4,2*Math.PI/4);
-		this.draw_arc(c,5,2,3,6*Math.PI/4,2*Math.PI/4);
-		this.draw_arc(c,7,0,2,3*Math.PI/4,-3*Math.PI/4);
-		this.draw_line(c,0,5,0,24);
-		this.draw_line(c,0,5,5,5);
-		
-	   
+        //contact
+        this.draw_line(c,12,-22,12,-12);
+        this.draw_circle(c,  12,-10,2,false );
+        this.draw_line(c,12,8,20,-12); //contact
+		this.draw_circle(c,  12,10,2,false );
+        this.draw_line(c,12,22,12,12);
+        //bobine
+        this.draw_line(c,-22,-22,-22,-16);
+        this.draw_arc(c,-22,-12,4,6*Math.PI/4,2*Math.PI/4);
+        this.draw_arc(c,-22,-4,4,6*Math.PI/4,2*Math.PI/4);
+        this.draw_arc(c,-22,4,4,6*Math.PI/4,2*Math.PI/4);
+        this.draw_arc(c,-22,12,4,6*Math.PI/4,2*Math.PI/4);
+        this.draw_line(c,-22,22,-22,16)
+		  	   
 	    if (this.properties.name)
 	    	this.draw_text(c,this.properties.name,16,18,6,property_size);
 	};
