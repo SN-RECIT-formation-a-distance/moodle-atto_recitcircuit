@@ -7027,10 +7027,10 @@ schematic = (function() {
   
 	function magneticswitch(x,y,rotation,name,am) {
 		Component.call(this,'ms',x,y,rotation);
-		this.properties.name = name ? name :'L1';
+		this.properties.name = name ? name :'S1';
 		this.add_connection(0,-24);
 		this.add_connection(0,24);
-		this.bounding_box = [-7,-24,31,24];
+		this.bounding_box = [-24,-24,24,24];
 		this.update_coords();
 	}
 	magneticswitch.prototype = new Component();
@@ -7042,16 +7042,20 @@ schematic = (function() {
 
 	magneticswitch.prototype.draw = function(c) {
 		Component.prototype.draw.call(this,c); 
-		
-		  
-		this.draw_line(c,0,-24,0,-5);
-		this.draw_line(c,0,-5,5,-5);
-		this.draw_circle(c,5,0,12,false);
-		this.draw_arc(c,5,-2,3,6*Math.PI/4,2*Math.PI/4);
-		this.draw_arc(c,5,2,3,6*Math.PI/4,2*Math.PI/4);
-		this.draw_arc(c,7,0,2,3*Math.PI/4,-3*Math.PI/4);
-		this.draw_line(c,0,5,0,24);
-		this.draw_line(c,0,5,5,5);
+		 
+		this.draw_line(c,0,-24,0,-20);
+
+        this.draw_line(c,-10,-20,10,-20);
+        this.draw_line(c,-10,20,10,20);
+        this.draw_line(c,-10,-20,-10,20);
+        this.draw_line(c,10,-20,10,20);
+
+        this.draw_line(c,0,24,0,20);
+
+        this.draw_line(c,1,-20,1,10);
+        this.draw_line(c,-1,-10,-1,20);
+
+
 		
 	   
 	    if (this.properties.name)
