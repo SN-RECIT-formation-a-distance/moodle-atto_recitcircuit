@@ -6936,7 +6936,7 @@ schematic = (function() {
   
 	function cellpic(x,y,rotation,name,am) {
 		Component.call(this,'cp',x,y,rotation);
-		this.properties.name = name ? name :'L1';
+		this.properties.name = name ? name :'P1';
 		this.add_connection(0,-24);
 		this.add_connection(0,24);
 		this.bounding_box = [-7,-24,31,24];
@@ -6953,14 +6953,12 @@ schematic = (function() {
 		Component.prototype.draw.call(this,c); 
 		
 		  
-		this.draw_line(c,0,-24,0,-5);
-		this.draw_line(c,0,-5,5,-5);
-		this.draw_circle(c,5,0,12,false);
-		this.draw_arc(c,5,-2,3,6*Math.PI/4,2*Math.PI/4);
-		this.draw_arc(c,5,2,3,6*Math.PI/4,2*Math.PI/4);
-		this.draw_arc(c,7,0,2,3*Math.PI/4,-3*Math.PI/4);
-		this.draw_line(c,0,5,0,24);
-		this.draw_line(c,0,5,5,5);
+		this.draw_line(c,0,-24,0,-3);
+		//this.draw_line(c,0,-5,5,-5);
+		this.draw_circle(c,0,0,12,false);
+        this.draw_line(c,-6,-3,6,-3);
+		this.draw_line(c,0,6,0,24);
+        this.draw_arc(c,0,0,6,7.9*Math.PI/4,4.1*Math.PI/4);
 		
 	   
 	    if (this.properties.name)
@@ -6983,10 +6981,10 @@ schematic = (function() {
   
 	function buttonswitch(x,y,rotation,name,am) {
 		Component.call(this,'bs',x,y,rotation);
-		this.properties.name = name ? name :'L1';
+		this.properties.name = name ? name :'Btn1';
 		this.add_connection(0,-24);
 		this.add_connection(0,24);
-		this.bounding_box = [-7,-24,31,24];
+		this.bounding_box = [-24,-24,24,24];
 		this.update_coords();
 	}
 	buttonswitch.prototype = new Component();
@@ -7000,14 +6998,13 @@ schematic = (function() {
 		Component.prototype.draw.call(this,c); 
 		
 		  
-		this.draw_line(c,0,-24,0,-5);
-		this.draw_line(c,0,-5,5,-5);
-		this.draw_circle(c,5,0,12,false);
-		this.draw_arc(c,5,-2,3,6*Math.PI/4,2*Math.PI/4);
-		this.draw_arc(c,5,2,3,6*Math.PI/4,2*Math.PI/4);
-		this.draw_arc(c,7,0,2,3*Math.PI/4,-3*Math.PI/4);
-		this.draw_line(c,0,5,0,24);
-		this.draw_line(c,0,5,5,5);
+		this.draw_line(c,0,-24,0,-12);
+		this.draw_circle(c,0,-10,2,false);
+        this.draw_line(c,-10,-14,-10,12);
+        this.draw_line(c,-20,0,-10,0);
+        this.draw_circle(c,0,10,2,false);
+        this.draw_line(c,0,24,0,12);
+
 		
 	   
 	    if (this.properties.name)
