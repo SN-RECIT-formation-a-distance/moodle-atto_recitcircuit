@@ -352,62 +352,6 @@
                 dialogue.centerDialogue();
                 dialogue.show();
                 this.markUpdated();
-    
-                /*var selected = false;
-                if (this.get('host').getSelection() !== false) {
-                    selected = this._getSelectedImageProperties();
-                }
-                document.getElementById(IFID).addEventListener("load", function() {
-                    var circuitpad =  document.getElementById(IFID).contentDocument.getElementsById('canvas');
-                    var iframe = document.getElementById(IFID).contentWindow;
-                    myLC = iframe.LC.init(circuitpad,
-                           {
-                                imageURLPrefix: 'assets/img',
-                                tools: iframe.LC.defaultTools.concat([iframe.regularShapes])
-                           });
-    
-                    if (selected) { // Selection is an image.
-                        var newImage = new Image();
-                        newImage.src = selected.src;
-                        var newShape = iframe.LC.createShape('Image',
-                                       {
-                                            x: 10,
-                                            y: 10,
-                                            image: newImage
-                                       });
-                        myLC.saveShape(newShape);
-                    }
-    
-                    // IE 11 and under do not understand CSS3 height calc().
-                    if (navigator.userAgent.indexOf('MSIE') !== -1
-                        || navigator.appVersion.indexOf('Trident/') > 0) {
-                        var ieheight = document.documentElement.clientHeight;
-                        if (Y.one('.moodle-dialogue-focused')) {
-                            Y.one('.moodle-dialogue-focused').setStyle('height', ieheight + 'px');
-                        }
-                        if (Y.one('.moodle-dialogue-focused .moodle-dialogue-bd')) {
-                            Y.one('.moodle-dialogue-focused .moodle-dialogue-bd').setStyle('height', ieheight - 50 + 'px');
-                        }
-                    }
-    
-                    // Set top and left to corner and calculate height with CSS3.
-                    if (Y.one('.moodle-dialogue-focused')) {
-                        Y.one('.moodle-dialogue-focused').setStyle('position', 'fixed');
-                        Y.one('.moodle-dialogue-focused').setStyle('z-index', '9999');
-                        Y.one('.moodle-dialogue-focused').setStyle('top', '0');
-                        Y.one('.moodle-dialogue-focused').setStyle('left', '0');
-                    }
-                    if (Y.one('.moodle-dialogue-focused .moodle-dialogue-bd')) {
-                        Y.one('.moodle-dialogue-focused .moodle-dialogue-bd').setStyle('height', 'calc(100% - 50px)');
-                        Y.one('.moodle-dialogue-focused .moodle-dialogue-bd').setStyle('padding', '0');
-                    }
-                    if (Y.one('.moodle-dialogue-focused').ancestor('.moodle-dialogue-base')) {
-                        Y.one('.moodle-dialogue-focused').ancestor('.moodle-dialogue-base').setStyle('bottom', "0");
-                    }
-                    if (Y.one('.moodle-dialogue-focused').ancestor('.moodle-dialogue-fullscreen')) {
-                        Y.one('.moodle-dialogue-focused').ancestor('.moodle-dialogue-fullscreen').setStyle('bottom', "0");
-                    }
-                });*/
             },
     
             /**

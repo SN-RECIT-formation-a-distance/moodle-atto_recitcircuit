@@ -31,10 +31,10 @@ $string['insert'] = 'Insert Circuit';
 $string['settings'] = 'Circuit settings';
 $string['storeinrepo'] = 'Store as image file';
 $string['storeinrepo_desc'] = 'If checked the circuit will be saved as a standard image upload instead of a base64 inline image.';
-$string['allusers'] = 'all users';
-$string['teachersonly'] = 'teachers only';
-$string['allowedusers'] = 'allowedusers etc';
-$string['allowedusers_desc'] = 'allowedusers decsetc.';
+$string['allusers'] = 'All users';
+$string['teachersonly'] = 'Teachers only';
+$string['allowedusers'] = 'Allowed users';
+$string['allowedusers_desc'] = 'Allowed users to use circuit';
 
     $string['error1'] =  'Sorry; there was a browser error in starting the schematic tool. We recommend using the latest versions of Firefox and Chrome.';
     $string['Ground_connection'] =  'Ground connection';

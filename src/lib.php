@@ -209,41 +209,26 @@ function atto_circuit_strings_for_js() {
  * @param string $elementid
  */
 function atto_circuit_params_for_js($elementid, $options, $fpoptions) {
-   /* global $CFG, $SESSION, $USER, $COURSE, $SITE, $PAGE, $DB, $THEME ;
+    global $USER;
     $context = $options['context'];
     if (!$context) {
         $context = context_system::instance();
     }
+    $allowedusers = get_config('atto_circuit', 'allowedusers');
     
-    //$context = context_course::instance($COURSE->id);
-    $context = get_context_instance(CONTEXT_COURSE,$COURSE->id);
-    $roles = array();
-$roles = get_user_roles($context, $USER->id, false);
-$role = key($roles);
-$rolename = $roles[$role]->shortname;
-
-
-    
-    $sesskey = sesskey();
-    $allowedusers = get_config('atto_circuit', 'allowedusers');*/
-    
-
+    $allowed = 0;
     // Update $allowedtypes to account for capabilities.
-  /*  if ($allowedusers === 'teachersonly' && ((has_capability('moodle/legacy:editingteacher', $context, $USER->id, false) || (has_capability('moodle/legacy:teacher', $context, $USER->id, false)))))*/ 
-    /*if (($allowedusers === 'teachersonly') && ($rolename ==='coursecreator')){*/
+    if ($allowedusers === 'teachersonly' && has_capability('atto/recitcircuit:teacher', $context, $USER->id, false)){
         $allowed = 1;
-    /*} 
-    else if ($allowedusers === 'allusers' ) {
-    $allowed = 1;
+    } 
+    else if ($allowedusers === 'allusers') {
+        $allowed = 1;
     }
-    else {
-        $allowed = 0;
-    }*/
 
    
-             
+    $storeinrepo = 1;//get_config('atto_circuit', 'storeinrepo')
     // Pass the number of visible groups as a param.
-    $params = array('storeinrepo' => get_config('atto_circuit', 'storeinrepo'),
+    $params = array('storeinrepo' => $storeinrepo,
                     'allowed' => $allowed);
 
     return $params;

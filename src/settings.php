@@ -37,13 +37,13 @@ if ($ADMIN->fulltree) {
     $setting = new admin_setting_configcheckbox('atto_circuit/storeinrepo',
                                                 $name,
                                                 $desc,
-                                                0);
-    $settings->add($setting);
+                                                1);
+    //$settings->add($setting);
     
     $options = array(
         'allusers' => new lang_string('allusers', 'atto_circuit'),
         'teachersonly' => new lang_string('teachersonly', 'atto_circuit'),
-            );
+    );
     $name = get_string('allowedusers', 'atto_circuit');
     $desc = get_string('allowedusers_desc', 'atto_circuit');
     $default = 'allusers';
