@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<libraries>
+    <library>
+        <location>js/hammer.js</location>
+        <name>Hammer</name>
+        <version>1.0.0</version>
+        <license>Apache</license>
+        <licenseversion>2.0</licenseversion>
+    </library>
+    <library>
+        <location>js/schematic.js</location>
+        <name>schematic.js</name>
+        <version>1.0.0</version>
+        <license>Apache</license>
+        <licenseversion>2.0</licenseversion>
+    </library>
+</libraries>
