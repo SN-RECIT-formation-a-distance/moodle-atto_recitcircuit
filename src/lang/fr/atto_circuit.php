@@ -55,6 +55,7 @@ $string['magneticswitch'] =  'Interrupteur magnétique';
 $string['light'] =  'Ampoule';
 $string['sound'] =  'Avertisseur sonore';
 $string['resistor_variable'] =  'Resistor variable ';
+$string['resistor'] =  'Resistor';
 $string['toggle_switch'] =  'Interrupteur à bascule ';
 $string['capacitor'] =  'Condensateur ';
 $string['inductor'] =  'Inductance ';

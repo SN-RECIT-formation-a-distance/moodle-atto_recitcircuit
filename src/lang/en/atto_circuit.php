@@ -54,6 +54,7 @@ $string['magneticswitch'] =  'Magnetic switch';
 $string['light'] =  'Light';
 $string['sound'] =  'Buzzer';
 $string['resistor_variable'] =  'Resistor variable';
+$string['resistor'] =  'Resistor';
 $string['toggle_switch'] =  'Toggle switch';
 $string['capacitor'] =  'capacitor';
 $string['inductor'] =  'inductor';
