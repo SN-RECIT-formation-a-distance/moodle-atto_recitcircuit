@@ -2633,7 +2633,7 @@ schematic = (function() {
 	var property_size = 10;  					// point size for Component property text
 	var annotation_size = 10;  					// point size for diagram annotations
     var parts_map = {
-    	//'g': [Ground, window.parent.M.str.atto_circuit.ground_connection],
+    	'g': [Ground, window.parent.M.str.atto_circuit.ground_connection],
     	//'L': [Label, window.parent.M.str.atto_circuit.node_label],
 		'v': [Pile, window.parent.M.str.atto_circuit.voltage_pile],
 		'f': [fusible, window.parent.M.str.atto_circuit.fuse],
@@ -5734,7 +5734,7 @@ schematic = (function() {
 		var part = canvas.partw;		//WMc
 
 	    canvas.style.borderColor = border_style;
-	    part.sch.message(part.tip+window.parent.M.str.atto_circuit.drag_onto_diagram);
+	    part.sch.message(part.tip+ '. ' +window.parent.M.str.atto_circuit.drag_onto_diagram);
 	    //part.sch.message(part.tip);
 	    return false;
 	}
